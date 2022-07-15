@@ -42,9 +42,8 @@ public class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity
             .Local
             .FirstOrDefault(entry => entry.Id.Equals(t.Id));
 
-        if (local != null)
+        if (local is not null)
         {
-            // detach
             _context.Entry(local).State = EntityState.Detached;
         }
 

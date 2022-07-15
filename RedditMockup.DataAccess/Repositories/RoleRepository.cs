@@ -1,0 +1,22 @@
+﻿using Microsoft.EntityFrameworkCore;
+using RedditMockup.DataAccess.Base;
+using RedditMockup.DataAccess.Context;
+using RedditMockup.Model.Entities;
+using Sieve.Services;
+
+namespace RedditMockup.DataAccess.Repositories;
+
+public class RoleRepository : BaseRepository<Role>
+{
+    private readonly RedditMockupContext _context;
+
+    public RoleRepository(RedditMockupContext context, ISieveProcessor sieveProcessor) : base(context, sieveProcessor) =>
+        _context = context;
+
+    public async Task<List<Role?>> LoadByUserIdAsync(int userId, CancellationToken cancellationToken = new()) =>
+        await _context.UserRoles!
+            .Where(x => x.UserId == userId)
+            .Include(x => x.Role)
+            .Select(x => x.Role)
+            .ToListAsync(cancellationToken);
+}

@@ -155,7 +155,7 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
         {
             Data = response,
             IsSuccess = true,
-            Message = "Successfully updated the answer. New answer:"
+            Message = $"Successfully updated the answer. New answer title: {response.Title}, new answer description: {response.Description}"
         };
 
     }

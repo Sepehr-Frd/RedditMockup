@@ -27,10 +27,10 @@ public class ProfileBusiness : BaseBusiness<Model.Entities.Profile, ProfileDto>
     public async Task<SamanSalamatResponse?> UpdateAsync(ProfileDto dto, HttpContext httpContext, CancellationToken cancellationToken = new())
     {
         var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
+        Console.WriteLine(int.Parse(userId));
         var user = await _userRepository.GetByIdAsync(int.Parse(userId), cancellationToken);
-
-        if (user == null)
+        Console.WriteLine(user);
+        if (user is null)
         {
             return new SamanSalamatResponse()
             {

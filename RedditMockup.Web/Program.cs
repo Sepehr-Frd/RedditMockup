@@ -28,7 +28,7 @@ try
         .InjectAuthentication()
         .AddEndpointsApiExplorer()
         .InjectNLog(builder.Environment)
-        .InjectContext(builder.Configuration)
+        .InjectContext(builder.Configuration, builder.Environment)
         .InjectBusinesses()
         .InjectFluentValidation()
         .InjectAutoMapper()

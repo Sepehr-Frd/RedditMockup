@@ -40,7 +40,7 @@ public class RedditMockupContext : DbContext
             {
                 Id = 2,
                 Title = "User",
-                Description = "User of Application"
+                Description = "User of Application",
             }
         });
 
@@ -75,6 +75,20 @@ public class RedditMockupContext : DbContext
                 Username = "sepehr_frd",
                 Password = "sfr1376".GetHashStringAsync().Result,
                 PersonId = 2
+            }
+
+        });
+
+        modelBuilder.Entity<Profile>().HasData(new List<Profile> {
+            new()
+            {
+                Id = 1,
+                UserId = 1,
+            },
+            new()
+            {
+                Id = 2,
+                UserId = 2,
             }
         });
 

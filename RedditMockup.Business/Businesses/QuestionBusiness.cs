@@ -13,6 +13,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
 {
     private readonly QuestionRepository _questionRepository;
     private readonly QuestionVoteRepository _questionVoteRepository;
+    private readonly UserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
@@ -20,6 +21,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
     {
         _questionRepository = unitOfWork.QuestionRepository!;
         _questionVoteRepository = unitOfWork.QuestionVoteRepository!;
+        _userRepository = unitOfWork.UserRepository!;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
 
@@ -29,13 +31,20 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
     {
         var question = _mapper.Map<Question>(dto);
 
-        var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var stringUserId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        question.UserId = int.Parse(userId);
+        int userId = int.Parse(stringUserId);
+
+        var user = await _userRepository.GetByIdAsync(userId);
+
 
         var questionInstance = await _questionRepository.CreateAsync(question, cancellationToken);
 
-        question.User!.Score += 1;
+        user.Questions.Add(questionInstance);
+
+        user.Score += 1;
+
+        _userRepository.UpdateAsync(user);
 
         await _unitOfWork.CommitAsync(cancellationToken);
 

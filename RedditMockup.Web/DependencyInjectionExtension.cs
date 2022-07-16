@@ -42,13 +42,12 @@ internal static class DependencyInjectionExtension
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
     internal static IServiceCollection InjectContext(this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        return services.AddDbContext<RedditMockupContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("Default"), x => x.MigrationsAssembly("RedditMockup.DataAccess")));
-
-    }
-
+        IConfiguration configuration, IWebHostEnvironment environment) =>
+        environment.IsDevelopment() || environment.IsEnvironment("Testing")
+            ? services.AddDbContextPool<RedditMockupContext>(options =>
+                options.UseInMemoryDatabase("RedditMockup"))
+            : services.AddDbContextPool<RedditMockupContext>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("Default")));
     internal static IServiceCollection InjectNLog(this IServiceCollection services,
         IWebHostEnvironment environment)
     {

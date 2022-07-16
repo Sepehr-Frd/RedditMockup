@@ -14,5 +14,6 @@ public class AnswerRepository : BaseRepository<Answer>
 
     public async Task<Answer?> GetByIdAsync(int id, CancellationToken cancellationToken = new()) =>
         (await _context.Answers!
+            .Include(answer => answer.Votes)
             .SingleOrDefaultAsync(x => x.Id == id, cancellationToken))!;
 }

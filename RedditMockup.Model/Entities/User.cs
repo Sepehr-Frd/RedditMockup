@@ -5,6 +5,7 @@ namespace RedditMockup.Model.Entities;
 
 public class User : BaseEntity
 {
+
     [Sieve(CanSort = true, CanFilter = true)]
     public string? Username { get; set; }
 

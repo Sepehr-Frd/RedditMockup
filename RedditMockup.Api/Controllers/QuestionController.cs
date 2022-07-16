@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NLog;
 using RedditMockup.Api.Base;
 using RedditMockup.Business.Businesses;
 using RedditMockup.Business.Contracts;
@@ -36,6 +35,10 @@ public class QuestionController : BaseController<Question, QuestionDto>
     [AllowAnonymous]
     public async Task<List<VoteDto>?> GetVotesAsync([FromQuery] int questionId, CancellationToken cancellationToken) =>
         await _questionBusiness.GetVotesAsync(questionId, cancellationToken);
+
+    [HttpPut]
+    public async Task<SamanSalamatResponse?> UpdateQuestionAsync([FromQuery] int questionId, QuestionDto questionDto, CancellationToken cancellationToken) =>
+        await _questionBusiness.UpdateAsync(questionId, questionDto, cancellationToken);
 
     [HttpPost]
     public async override Task<SamanSalamatResponse?> CreateAsync([FromQuery] QuestionDto dto, CancellationToken cancellationToken) =>

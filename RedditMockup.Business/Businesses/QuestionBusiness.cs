@@ -37,7 +37,6 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
 
         var user = await _userRepository.GetByIdAsync(userId);
 
-
         var questionInstance = await _questionRepository.CreateAsync(question, cancellationToken);
 
         user.Questions.Add(questionInstance);
@@ -68,7 +67,14 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
     public async Task<List<AnswerDto>?> GetAnswersAsync(int questionId, CancellationToken cancellationToken = new())
     {
         var question = await _questionRepository.GetByIdAsync(questionId, cancellationToken);
+
+        if (question is null)
+        {
+            return new List<AnswerDto>();
+        }
+
         var answers = question.Answers.ToList();
+
         var response = _mapper.Map<List<AnswerDto>>(answers);
 
         return response;
@@ -89,7 +95,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
     {
         var question = await _questionRepository.GetByIdAsync(questionId, cancellationToken);
 
-        if (question == null)
+        if (question is null)
         {
             return new SamanSalamatResponse()
             {
@@ -120,6 +126,35 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
         {
             IsSuccess = true,
             Message = "Vote submitted"
+        };
+
+    }
+
+    public async Task<SamanSalamatResponse?> UpdateAsync(int questionId, QuestionDto questionDto, CancellationToken cancellationToken = new())
+    {
+        var question = await _questionRepository.GetByIdAsync(questionId);
+
+        if (question is null)
+        {
+            return new SamanSalamatResponse()
+            {
+                IsSuccess = false,
+                Message = "No question found with given question ID"
+            };
+        }
+
+        question.Title = questionDto.Title;
+
+        question.Description = questionDto.Description;
+
+        await _questionRepository.UpdateAsync(question, cancellationToken);
+
+        await _unitOfWork.CommitAsync(cancellationToken);
+
+        return new SamanSalamatResponse()
+        {
+            IsSuccess = true,
+            Message = $"Successfully updated Question. Update title: {question.Title}, updated description: {question.Description}"
         };
 
     }

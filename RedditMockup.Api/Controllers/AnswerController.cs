@@ -17,6 +17,11 @@ public class AnswerController : BaseController<Answer, AnswerDto>
         _answerBusiness = (AnswerBusiness)business;
     }
 
+
+    [HttpPut]
+    public async Task<SamanSalamatResponse?> UpdateAnswerAsync([FromQuery] int answerId, int questionId, AnswerDto answerDto, CancellationToken cancellationToken) =>
+        await _answerBusiness.UpdateAsync(answerId, questionId, answerDto, cancellationToken);
+
     [Authorization]
     [HttpPost]
     public override async Task<SamanSalamatResponse?> CreateAsync([FromQuery] AnswerDto dto, CancellationToken cancellationToken) =>

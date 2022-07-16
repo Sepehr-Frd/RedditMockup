@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
-using NLog;
 using RedditMockup.Business.Base;
 using RedditMockup.Common.Dtos;
 using RedditMockup.DataAccess.Contracts;
@@ -18,9 +17,9 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
     private readonly UserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-    private readonly Logger _logger;
 
-    public AnswerBusiness(IUnitOfWork unitOfWork, IMapper mapper, Logger logger) : base(unitOfWork, unitOfWork.AnswerRepository!, mapper)
+
+    public AnswerBusiness(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, unitOfWork.AnswerRepository!, mapper)
     {
         _answerRepository = unitOfWork.AnswerRepository!;
         _questionRepository = unitOfWork.QuestionRepository!;
@@ -28,7 +27,6 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
         _userRepository = unitOfWork.UserRepository!;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
-        _logger = logger;
     }
 
     public async Task<SamanSalamatResponse?> SubmitAnswerAsync(int questionId, AnswerDto answerDto, HttpContext httpContext, CancellationToken cancellationToken = new())
@@ -58,7 +56,6 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
 
         if (answeringUser is null)
         {
-            _logger.Error("AnswerRepository returned null for CreateAsync inside AnswerBusiness");
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
@@ -86,7 +83,7 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
     {
         var answer = await _answerRepository.GetByIdAsync(answerId, cancellationToken);
 
-        if (answer == null)
+        if (answer is null)
         {
             return new SamanSalamatResponse()
             {

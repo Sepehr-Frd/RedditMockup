@@ -33,6 +33,11 @@ public class UserBusiness : BaseBusiness<User, UserDto>
 
             var userInstance = await _userRepository.CreateAsync(user, cancellationToken);
 
+            userInstance.Profile = new()
+            {
+                UserId = userInstance.Id
+            };
+
             var userRole = new UserRole()
             {
                 UserId = userInstance.Id,

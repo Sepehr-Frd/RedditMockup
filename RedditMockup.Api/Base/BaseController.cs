@@ -33,10 +33,6 @@ public class BaseController<T, DTO> : ControllerBase, IBaseController<T, DTO>
     public async virtual Task<SamanSalamatResponse?> CreateAsync([FromQuery] DTO dto, CancellationToken cancellationToken) =>
         await _business.CreateAsync(dto, cancellationToken);
 
-    [HttpPut]
-    public async Task<SamanSalamatResponse?> UpdateAsync([FromQuery] DTO dto, CancellationToken cancellationToken) =>
-        await _business.UpdateAsync(dto, cancellationToken);
-
     [HttpDelete]
     public async Task<SamanSalamatResponse?> DeleteAsync([FromQuery] int id, CancellationToken cancellationToken) =>
         await _business.DeleteAsync(id, cancellationToken);

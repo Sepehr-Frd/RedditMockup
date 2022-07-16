@@ -13,8 +13,6 @@ public interface IBaseController<T, DTO>
 
     Task<SamanSalamatResponse<List<DTO>>?> GetAllAsync(SieveModel sieveModel, CancellationToken cancellationToken);
 
-    Task<SamanSalamatResponse?> UpdateAsync(DTO dto, CancellationToken cancellationToken);
-
     Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken);
 
     void Options();

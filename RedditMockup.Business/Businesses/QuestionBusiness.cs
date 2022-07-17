@@ -64,30 +64,55 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
         return dto;
     }
 
-    public async Task<List<AnswerDto>?> GetAnswersAsync(int questionId, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> GetAnswersAsync(int questionId, CancellationToken cancellationToken = new())
     {
         var question = await _questionRepository.GetByIdAsync(questionId, cancellationToken);
 
         if (question is null)
         {
-            return new List<AnswerDto>();
+            return new SamanSalamatResponse()
+            {
+                IsSuccess = false,
+                Message = "No question found with given question ID"
+            };
         }
-
+        
         var answers = question.Answers.ToList();
 
         var response = _mapper.Map<List<AnswerDto>>(answers);
 
-        return response;
+        return new SamanSalamatResponse()
+        {
+            Data = response,
+            IsSuccess = true,
+            Message = $"Successfully retrieved anasweres for {question.Title} : {question.Description}"
 
+        };
     }
 
-    public async Task<List<VoteDto>?> GetVotesAsync(int questionId, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> GetVotesAsync(int questionId, CancellationToken cancellationToken = new())
     {
         var question = await _questionRepository.GetByIdAsync(questionId, cancellationToken);
+        
+        if (question is null)
+        {
+            return new SamanSalamatResponse()
+            {
+                IsSuccess = false,
+                Message = "No question found with given question ID"
+            };
+        }
+
         var votes = question.Votes.ToList();
+        
         var response = _mapper.Map<List<VoteDto>>(votes);
 
-        return response;
+        return new SamanSalamatResponse()
+        {
+            Data = response,
+            IsSuccess = true,
+            Message = $"Successfully retrieved votes for {question.Title} : {question.Description}"
+        };
 
     }
 
@@ -102,7 +127,6 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
                 IsSuccess = false,
                 Message = $"No question found with id of {questionId}"
             };
-
         }
 
         if (kind)
@@ -158,4 +182,22 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
         };
 
     }
+
+    //public async Task<SamanSalamatResponse?> DeleteAsync(int questionId, CancellationToken cancellationToken = new())
+    //{
+    //    var question = await _questionRepository.GetByIdAsync(questionId, cancellationToken);
+
+    //    if (question is null)
+    //    {
+    //        return new SamanSalamatResponse()
+    //        {
+    //            IsSuccess = false,
+    //            Message = "No question found with given question id"
+    //        };
+    //    }
+
+    //    return await DeleteAsync(question, cancellationToken);
+
+    //}
+
 }

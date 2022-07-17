@@ -18,7 +18,7 @@ public class Answer : BaseEntity
     public int? UserId { get; set; }
 
 
-    public virtual ICollection<AnswerVote> Votes { get; set; } = new List<AnswerVote>();
+    public virtual ICollection<AnswerVote>? Votes { get; set; }
 
     [ForeignKey("QuestionId")]
     public virtual Question? Question { get; set; }

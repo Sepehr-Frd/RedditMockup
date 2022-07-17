@@ -57,4 +57,9 @@ public class AccountController : ControllerBase
     public async Task<SamanSalamatResponse?> UpdateProfileAsync([FromQuery] ProfileDto profileDto, CancellationToken cancellationToken) =>
         await _profileBusiness.UpdateAsync(profileDto, HttpContext, cancellationToken);
 
+    [Authorization]
+    [HttpDelete]
+    public async Task<SamanSalamatResponse?> DeleteAccount(LoginDto loginDto, CancellationToken cancellationToken) =>
+        await _userBusiness.DeleteAsync(loginDto, cancellationToken);
+
 }

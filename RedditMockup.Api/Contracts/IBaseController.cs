@@ -5,8 +5,7 @@ using Sieve.Models;
 
 namespace RedditMockup.Api.Contracts;
 
-public interface IBaseController<T, DTO>
-    where T : BaseEntity
+public interface IBaseController<DTO>
     where DTO : IBaseDto
 {
     Task<SamanSalamatResponse?> CreateAsync(DTO dto, CancellationToken cancellationToken);

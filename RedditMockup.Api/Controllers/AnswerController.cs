@@ -12,20 +12,18 @@ public class AnswerController : BaseController<Answer, AnswerDto>
 {
     private readonly AnswerBusiness _answerBusiness;
 
-    public AnswerController(IBaseBusiness<AnswerDto> business) : base(business)
+    public AnswerController(IBaseBusiness<Answer, AnswerDto> business) : base(business)
     {
         _answerBusiness = (AnswerBusiness)business;
     }
 
-
     [HttpPut]
-    public async Task<SamanSalamatResponse?> UpdateAnswerAsync([FromQuery] int answerId, int questionId, AnswerDto answerDto, CancellationToken cancellationToken) =>
-        await _answerBusiness.UpdateAsync(answerId, questionId, answerDto, cancellationToken);
+    public async Task<SamanSalamatResponse?> UpdateAnswerAsync([FromQuery] int answerId, AnswerDto answerDto, CancellationToken cancellationToken) =>
+        await _answerBusiness.UpdateAsync(answerDto, cancellationToken);
 
     [Authorization]
-    [HttpPost]
-    public override async Task<SamanSalamatResponse?> CreateAsync([FromQuery] AnswerDto dto, CancellationToken cancellationToken) =>
-        await _answerBusiness.SubmitAnswerAsync(dto.QuestionId, dto, HttpContext, cancellationToken);
+    public async new Task<SamanSalamatResponse?> CreateAsync([FromQuery] AnswerDto dto, CancellationToken cancellationToken) =>
+        await _answerBusiness.SubmitAnswerAsync(dto, HttpContext, cancellationToken);
 
     [Authorization]
     [HttpPost]

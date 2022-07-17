@@ -68,4 +68,22 @@ public class UserBusiness : BaseBusiness<User, UserDto>
     public async Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = new()) =>
         await _userRepository.UsernameExistsAsync(username, cancellationToken);
 
+     public async Task<SamanSalamatResponse?> DeleteAsync(LoginDto loginDto, CancellationToken cancellationToken = new())
+    {
+        var isValid = await _userRepository.IsUsernameAndPasswordValidAsync(loginDto.Username!, loginDto.Password!, cancellationToken);
+
+        if (!isValid)
+        {
+            return new SamanSalamatResponse()
+            {
+                IsSuccess = false,
+                Message = "No user found with given user id"
+            };
+        }
+
+        var user = await _userRepository.LoadByUsernameAsync(loginDto.Username, cancellationToken);
+
+        return await DeleteAsync(user.Id, cancellationToken);
+    }
+
 }

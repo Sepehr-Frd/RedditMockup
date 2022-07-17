@@ -14,5 +14,5 @@ public interface IBaseRepository<T> where T : BaseEntity
 
     Task<T> DeleteAsync(T t, CancellationToken cancellationToken);
 
-    Task<T> DeleteAsync(int id, CancellationToken cancellationToken);
+    //Task<T> DeleteAsync(int id, CancellationToken cancellationToken);
 }

@@ -13,7 +13,8 @@ public class AnswerRepository : BaseRepository<Answer>
         _context = context;
 
     public async Task<Answer?> GetByIdAsync(int id, CancellationToken cancellationToken = new()) =>
-        (await _context.Answers!
+        await _context.Answers!
             .Include(answer => answer.Votes)
-            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken))!;
+            .Include(answer => answer.AnsweringUser)
+            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 }

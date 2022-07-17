@@ -21,9 +21,9 @@ public class User : BaseEntity
 
     public virtual Profile? Profile { get; set; }
 
-    public virtual ICollection<Question> Questions { get; set; } = new List<Question>();
+    public virtual ICollection<Question>? Questions { get; set; }
 
-    public virtual ICollection<Answer> Answers { get; set; } = new List<Answer>();
+    public virtual ICollection<Answer>? Answers { get; set; }
 
-    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public virtual ICollection<UserRole>? UserRoles { get; set; }
 }

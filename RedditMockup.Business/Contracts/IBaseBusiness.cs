@@ -1,10 +1,13 @@
 ﻿using RedditMockup.Common.Contracts;
 using RedditMockup.Common.Dtos;
+using RedditMockup.Model.Entities;
 using Sieve.Models;
 
 namespace RedditMockup.Business.Contracts;
 
-public interface IBaseBusiness<DTO> where DTO : IBaseDto
+public interface IBaseBusiness<T, DTO>
+    where DTO : IBaseDto
+    where T : BaseEntity
 {
     Task<SamanSalamatResponse?> CreateAsync(DTO dto, CancellationToken cancellationToken);
 

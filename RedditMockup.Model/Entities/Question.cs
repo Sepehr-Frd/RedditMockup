@@ -14,9 +14,9 @@ public class Question : BaseEntity
     [Sieve(CanFilter = true, CanSort = true)]
     public int? UserId { get; set; }
 
-    public virtual ICollection<Answer> Answers { get; set; } = new List<Answer>();
+    public virtual ICollection<Answer>? Answers { get; set; }
 
-    public virtual ICollection<QuestionVote> Votes { get; set; } = new List<QuestionVote>();
+    public virtual ICollection<QuestionVote>? Votes { get; set; }
 
     [ForeignKey("UserId")]
     public virtual User? User { get; set; }

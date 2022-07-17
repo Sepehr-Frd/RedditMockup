@@ -10,5 +10,5 @@ public class Role : BaseEntity
     [Sieve(CanSort = true, CanFilter = true)]
     public string? Description { get; set; }
 
-    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public virtual ICollection<UserRole>? UserRoles { get; set; }
 }

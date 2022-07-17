@@ -29,22 +29,22 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
         _mapper = mapper;
     }
 
-    public async Task<SamanSalamatResponse?> SubmitAnswerAsync(int questionId, AnswerDto answerDto, HttpContext httpContext, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> SubmitAnswerAsync(AnswerDto answerDto, HttpContext httpContext, CancellationToken cancellationToken = new())
     {
-        var question = await _questionRepository.GetByIdAsync(questionId, cancellationToken);
+        var question = await _questionRepository.GetByIdAsync(answerDto.QuestionId, cancellationToken);
 
-        if (question == null)
+        if (question is null)
         {
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = $"No question found with id of {questionId}"
+                Message = $"No question found with id of {answerDto.QuestionId}"
             };
         }
 
         var answer = _mapper.Map<Answer>(answerDto);
 
-        answer.QuestionId = questionId;
+        answer.QuestionId = answerDto.QuestionId;
 
         var stringUserId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -63,11 +63,11 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             };
         }
 
-        answeringUser!.Answers.Add(createdAnswer);
+        answeringUser.Answers.Add(createdAnswer);
 
-        answeringUser!.Score += 1;
+        answeringUser.Score += 1;
 
-        question.Answers.Add(createdAnswer);
+        _userRepository.UpdateAsync(answeringUser);
 
         await _unitOfWork.CommitAsync(cancellationToken);
 
@@ -92,9 +92,9 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             };
         }
 
-        if (kind)
+        if (kind && answer.Question?.User is not null)
         {
-            answer.AnsweringUser!.Score += 1;
+            answer.Question.User.Score += 1;
         }
 
         var vote = new AnswerVote()
@@ -114,13 +114,11 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             IsSuccess = true,
             Message = "Vote submitted"
         };
-
-
     }
 
-    public async Task<SamanSalamatResponse?> UpdateAsync(int answerId, int questionId, AnswerDto answerDto, CancellationToken cancellationToken = new())
+    public new async Task<SamanSalamatResponse?> UpdateAsync(AnswerDto answerDto, CancellationToken cancellationToken = new())
     {
-        var question = await _questionRepository.GetByIdAsync(questionId, cancellationToken);
+        var question = await _questionRepository.GetByIdAsync(answerDto.QuestionId, cancellationToken);
 
         if (question is null)
         {
@@ -131,7 +129,7 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             };
         }
 
-        var answer = question.Answers.SingleOrDefault(answer => answer.Id == answerId);
+        var answer = question.Answers?.SingleOrDefault(answer => answer.Id == answerDto.Id);
 
         if (answer is null)
         {
@@ -142,18 +140,32 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             };
         }
 
-        answer.Title = answerDto.Title;
-
-        answer.Description = answerDto.Description;
-
+        _mapper.Map(answerDto, answer);
+        
         var response = await _answerRepository.UpdateAsync(answer, cancellationToken);
 
         return new SamanSalamatResponse()
         {
-            Data = response,
             IsSuccess = true,
             Message = $"Successfully updated the answer. New answer title: {response.Title}, new answer description: {response.Description}"
         };
-
     }
+
+    //public async Task<SamanSalamatResponse?> DeleteAsync(int answerId, CancellationToken cancellationToken = new())
+    //{
+    //    var answer = await _answerRepository.GetByIdAsync(answerId, cancellationToken);
+
+    //    if (answer is null)
+    //    {
+    //        return new SamanSalamatResponse()
+    //        {
+    //            IsSuccess = false,
+    //            Message = "No answer found with given answer id"
+    //        };
+    //    }
+
+    //    return await DeleteAsync(answer, cancellationToken);
+
+    //}
+
 }

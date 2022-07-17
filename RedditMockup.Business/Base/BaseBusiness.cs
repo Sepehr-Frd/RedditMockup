@@ -9,7 +9,7 @@ using Sieve.Models;
 namespace RedditMockup.Business.Base;
 
 
-public class BaseBusiness<T, DTO> : IBaseBusiness<DTO>
+public class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
     where T : BaseEntity
     where DTO : IBaseDto
 {
@@ -72,8 +72,28 @@ public class BaseBusiness<T, DTO> : IBaseBusiness<DTO>
 
     public async Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken = new())
     {
-        await _repository.DeleteAsync(id, cancellationToken);
+        SieveModel sieveModel = new()
+        {
+            Filters = $"Id=={id}"
+        };
+        
+        var entities = await _repository.LoadAllAsync(sieveModel, null, cancellationToken);
+
+        var entity = entities.FirstOrDefault();
+
+        if (entity is null)
+        {
+            return new SamanSalamatResponse()
+            {
+                IsSuccess = false,
+                Message = "No instance was found with the given id"
+            };
+        }
+
+        await _repository.DeleteAsync(entity, cancellationToken);
+
         await _unitOfWork.CommitAsync(cancellationToken);
+
         return new SamanSalamatResponse
         {
             IsSuccess = true,

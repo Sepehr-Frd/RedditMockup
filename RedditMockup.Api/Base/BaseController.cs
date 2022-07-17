@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RedditMockup.Api.Contracts;
 using RedditMockup.Api.Filters;
@@ -13,14 +14,14 @@ namespace RedditMockup.Api.Base;
 [ApiController]
 [Route("api/[controller]")]
 [Authorization]
-public class BaseController<T, DTO> : ControllerBase, IBaseController<T, DTO>
+public class BaseController<T, DTO> : ControllerBase, IBaseController<DTO>
     where T : BaseEntity
     where DTO : IBaseDto
 {
 
-    private readonly IBaseBusiness<DTO> _business;
+    private readonly IBaseBusiness<T, DTO> _business;
 
-    public BaseController(IBaseBusiness<DTO> business) =>
+    public BaseController(IBaseBusiness<T, DTO> business) =>
         _business = business;
 
 
@@ -30,8 +31,12 @@ public class BaseController<T, DTO> : ControllerBase, IBaseController<T, DTO>
         await _business.LoadAllAsync(sieveModel, cancellationToken);
 
     [HttpPost]
-    public async virtual Task<SamanSalamatResponse?> CreateAsync([FromQuery] DTO dto, CancellationToken cancellationToken) =>
+    public async Task<SamanSalamatResponse?> CreateAsync([FromQuery] DTO dto, CancellationToken cancellationToken) =>
         await _business.CreateAsync(dto, cancellationToken);
+
+    //[Authorization]
+    //public async new Task<SamanSalamatResponse?> CreateAsync([FromQuery] AnswerDto dto, CancellationToken cancellationToken) =>
+    //    await _answerBusiness.SubmitAnswerAsync(dto, HttpContext, cancellationToken);
 
     [HttpDelete]
     public async Task<SamanSalamatResponse?> DeleteAsync([FromQuery] int id, CancellationToken cancellationToken) =>

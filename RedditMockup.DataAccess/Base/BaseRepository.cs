@@ -62,7 +62,7 @@ public class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity
     public async Task<T> DeleteAsync(int id, CancellationToken cancellationToken = new())
     {
         var record = await _dbSet.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (record != null)
+        if (record is null)
             return await DeleteAsync(record, cancellationToken);
         return Activator.CreateInstance<T>();
     }

@@ -17,5 +17,6 @@ public class QuestionRepository : BaseRepository<Question>
         (await _context.Questions!
             .Include(question => question.User)
             .Include(question => question.Votes)
+            .Include(question => question.Answers)
             .SingleOrDefaultAsync(x => x.Id == id, cancellationToken))!;
 }

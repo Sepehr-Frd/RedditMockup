@@ -1,8 +1,6 @@
-﻿using RedditMockup.Common.Contracts;
+﻿namespace RedditMockup.Common.Dtos;
 
-namespace RedditMockup.Common.Dtos;
-
-public class LoginDto : IBaseDto
+public class LoginDto
 {
 
     public string? Username { get; set; }

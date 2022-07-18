@@ -7,16 +7,10 @@ public class VoteProfile : AutoMapper.Profile
 {
     public VoteProfile()
     {
-        CreateMap<VoteDto, AnswerVote>(AutoMapper.MemberList.None)
-            .ForMember(destination => destination.Kind,
-                option =>
-                    option.MapFrom(source => source.Kind == "Upvote"))
+        CreateMap<VoteDto, AnswerVote>()
             .ReverseMap();
 
-        CreateMap<VoteDto, QuestionVote>(AutoMapper.MemberList.None)
-            .ForMember(destination => destination.Kind,
-                option =>
-                    option.MapFrom(source => source.Kind == "Upvote"))
+        CreateMap<VoteDto, QuestionVote>()
             .ReverseMap();
     }
 }

@@ -16,14 +16,12 @@
     <None Remove="FluentValidation" />
     <None Remove="FluentValidation.AspNetCore" />
     <None Remove="Profiles\" />
-    <None Remove="Contracts\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Helpers\" />
     <Folder Include="Validations\" />
     <Folder Include="Profiles\" />
     <Folder Include="ViewModels\" />
-    <Folder Include="Contracts\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RedditMockup.Model\RedditMockup.Model.csproj" />

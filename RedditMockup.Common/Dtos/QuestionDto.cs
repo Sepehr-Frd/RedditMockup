@@ -1,8 +1,6 @@
-﻿using RedditMockup.Common.Contracts;
+﻿namespace RedditMockup.Common.Dtos;
 
-namespace RedditMockup.Common.Dtos;
-
-public class QuestionDto : IBaseDto
+public class QuestionDto
 {
     public string? Title { get; set; }
     public string? Description { get; set; }

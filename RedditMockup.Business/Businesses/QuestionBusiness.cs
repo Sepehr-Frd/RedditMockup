@@ -1,11 +1,13 @@
 ﻿using System.Security.Claims;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using RedditMockup.Business.Base;
 using RedditMockup.Common.Dtos;
 using RedditMockup.DataAccess.Contracts;
 using RedditMockup.DataAccess.Repositories;
 using RedditMockup.Model.Entities;
+using Sieve.Models;
 
 namespace RedditMockup.Business.Businesses;
 
@@ -14,14 +16,16 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
     private readonly QuestionRepository _questionRepository;
     private readonly QuestionVoteRepository _questionVoteRepository;
     private readonly UserRepository _userRepository;
+    private readonly UserBusiness _userBusiness;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public QuestionBusiness(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, unitOfWork.QuestionRepository!, mapper)
+    public QuestionBusiness(IUnitOfWork unitOfWork, IMapper mapper, UserBusiness userBusiness) : base(unitOfWork, unitOfWork.QuestionRepository!, mapper)
     {
         _questionRepository = unitOfWork.QuestionRepository!;
         _questionVoteRepository = unitOfWork.QuestionVoteRepository!;
         _userRepository = unitOfWork.UserRepository!;
+        _userBusiness = userBusiness;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
 
@@ -35,38 +39,62 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
 
         int userId = int.Parse(stringUserId);
 
-        var user = await _userRepository.GetByIdAsync(userId);
+        question.UserId = userId;
 
-        var questionInstance = await _questionRepository.CreateAsync(question, cancellationToken);
-
-        user.Questions.Add(questionInstance);
+        var user = (await _userBusiness.LoadByIdAsync(userId, cancellationToken))!.Data!;
 
         user.Score += 1;
 
-        _userRepository.UpdateAsync(user);
+        return await CreateAsync(question, cancellationToken);
+    }
 
-        await _unitOfWork.CommitAsync(cancellationToken);
-
-        var result = _mapper.Map<QuestionDto>(questionInstance);
-
-        return new SamanSalamatResponse
+    public async Task<Question?> LoadModelByIdAsync(int id, CancellationToken cancellationToken = new())
+    {
+        SieveModel sieveModel = new()
         {
-            Data = result,
-            IsSuccess = true,
-            Message = "Entity Saved"
+            Filters = $"Id=={id}"
+        };
+
+        var questions = await _questionRepository.LoadAllAsync(sieveModel,
+            include => include
+            .Include(x => x.User)
+            .Include(x => x.Votes)
+            .Include(x => x.Answers),
+            cancellationToken);
+
+        if (questions.Count == 0)
+        {
+            return null;
+        }
+
+        return questions.Single();
+    }
+
+    public async Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken = new())
+    {
+        var question = await LoadModelByIdAsync(id, cancellationToken);
+
+        if (question is null)
+        {
+            return new SamanSalamatResponse()
+            {
+                IsSuccess = false,
+                Message = $"No question found with the ID of {id}"
+            };
+        }
+
+        var response = _mapper.Map<AnswerDto>(question);
+
+        return new SamanSalamatResponse()
+        {
+            Data = response,
+            IsSuccess = true
         };
     }
 
-    public async Task<QuestionDto?> GetByIdAsync(int questionId, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> LoadAnswersAsync(int id, CancellationToken cancellationToken = new())
     {
-        var question = await _questionRepository.GetByIdAsync(questionId, cancellationToken);
-        var dto = _mapper.Map<QuestionDto>(question);
-        return dto;
-    }
-
-    public async Task<SamanSalamatResponse?> GetAnswersAsync(int questionId, CancellationToken cancellationToken = new())
-    {
-        var question = await _questionRepository.GetByIdAsync(questionId, cancellationToken);
+        var question = await LoadModelByIdAsync(id, cancellationToken);
 
         if (question is null)
         {
@@ -77,23 +105,21 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
             };
         }
         
-        var answers = question.Answers.ToList();
+        var answers = question.Answers!.ToList();
 
         var response = _mapper.Map<List<AnswerDto>>(answers);
 
         return new SamanSalamatResponse()
         {
             Data = response,
-            IsSuccess = true,
-            Message = $"Successfully retrieved anasweres for {question.Title} : {question.Description}"
-
+            IsSuccess = true
         };
     }
 
-    public async Task<SamanSalamatResponse?> GetVotesAsync(int questionId, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> LoadVotesAsync(int id, CancellationToken cancellationToken = new())
     {
-        var question = await _questionRepository.GetByIdAsync(questionId, cancellationToken);
-        
+        var question = await LoadModelByIdAsync(id, cancellationToken);
+
         if (question is null)
         {
             return new SamanSalamatResponse()
@@ -103,7 +129,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
             };
         }
 
-        var votes = question.Votes.ToList();
+        var votes = question.Votes!.ToList();
         
         var response = _mapper.Map<List<VoteDto>>(votes);
 
@@ -111,21 +137,20 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
         {
             Data = response,
             IsSuccess = true,
-            Message = $"Successfully retrieved votes for {question.Title} : {question.Description}"
         };
 
     }
 
-    public async Task<SamanSalamatResponse?> SubmitVoteAsync(int questionId, bool kind, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> SubmitVoteAsync(int id, bool kind, CancellationToken cancellationToken = new())
     {
-        var question = await _questionRepository.GetByIdAsync(questionId, cancellationToken);
+        var question = await LoadModelByIdAsync(id, cancellationToken);
 
         if (question is null)
         {
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = $"No question found with id of {questionId}"
+                Message = $"No question found with id of {id}"
             };
         }
 
@@ -140,23 +165,21 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
             QuestionId = question.Id
         };
 
-        var createdVote = await _questionVoteRepository.CreateAsync(vote, cancellationToken);
-
-        question.Votes.Add(createdVote);
+        await _questionVoteRepository.CreateAsync(vote, cancellationToken);
 
         await _unitOfWork.CommitAsync(cancellationToken);
 
         return new SamanSalamatResponse()
         {
             IsSuccess = true,
-            Message = "Vote submitted"
+            Message = $"{(kind ? "Up" : "Down")}vote submitted"
         };
 
     }
 
-    public async Task<SamanSalamatResponse?> UpdateAsync(int questionId, QuestionDto questionDto, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> UpdateAsync(int id, QuestionDto questionDto, CancellationToken cancellationToken = new())
     {
-        var question = await _questionRepository.GetByIdAsync(questionId);
+        var question = await LoadModelByIdAsync(id, cancellationToken);
 
         if (question is null)
         {
@@ -167,37 +190,27 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
             };
         }
 
-        question.Title = questionDto.Title;
+        _mapper.Map(questionDto, question);
 
-        question.Description = questionDto.Description;
-
-        await _questionRepository.UpdateAsync(question, cancellationToken);
-
-        await _unitOfWork.CommitAsync(cancellationToken);
-
-        return new SamanSalamatResponse()
-        {
-            IsSuccess = true,
-            Message = $"Successfully updated Question. Update title: {question.Title}, updated description: {question.Description}"
-        };
+        return await UpdateAsync(question, cancellationToken);
 
     }
 
-    //public async Task<SamanSalamatResponse?> DeleteAsync(int questionId, CancellationToken cancellationToken = new())
-    //{
-    //    var question = await _questionRepository.GetByIdAsync(questionId, cancellationToken);
+    public async Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken = new())
+    {
+        var question = await LoadModelByIdAsync(id, cancellationToken);
 
-    //    if (question is null)
-    //    {
-    //        return new SamanSalamatResponse()
-    //        {
-    //            IsSuccess = false,
-    //            Message = "No question found with given question id"
-    //        };
-    //    }
+        if (question is null)
+        {
+            return new SamanSalamatResponse()
+            {
+                IsSuccess = false,
+                Message = $"No question found with id of {id}"
+            };
+        }
 
-    //    return await DeleteAsync(question, cancellationToken);
+        return await DeleteAsync(question, cancellationToken);
 
-    //}
+    }
 
 }

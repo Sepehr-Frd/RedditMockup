@@ -1,8 +1,6 @@
-﻿using RedditMockup.Common.Contracts;
+﻿namespace RedditMockup.Common.Dtos;
 
-namespace RedditMockup.Common.Dtos;
-
-public class VoteDto : IBaseDto
+public class VoteDto
 {
-    public string Kind { get; set; }
+    public bool Kind { get; set; }
 }

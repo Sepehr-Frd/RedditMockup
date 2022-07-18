@@ -6,9 +6,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using NLog.Web;
 using RedditMockup.Api.Contracts;
-using RedditMockup.Api.Filters;
 using RedditMockup.Business.Contracts;
-using RedditMockup.Common.Contracts;
 using RedditMockup.Common.Profiles;
 using RedditMockup.Common.Validations;
 using RedditMockup.DataAccess;
@@ -30,7 +28,7 @@ internal static class DependencyInjectionExtension
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
             })
-            .AddApplicationPart(typeof(IBaseController<BaseEntity, IBaseDto>).Assembly)
+            .AddApplicationPart(typeof(IBaseController<BaseEntity>).Assembly)
             .Services
             .AddHealthChecks()
             .Services;
@@ -48,13 +46,14 @@ internal static class DependencyInjectionExtension
                 options.UseInMemoryDatabase("RedditMockup"))
             : services.AddDbContextPool<RedditMockupContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("Default")));
+
     internal static IServiceCollection InjectNLog(this IServiceCollection services,
         IWebHostEnvironment environment)
     {
         var factory = NLogBuilder.ConfigureNLog(
-                environment.IsProduction()
-                    ? "nlog.config"
-                    : $"nlog.{environment.EnvironmentName}.config");
+            environment.IsProduction()
+                ? "nlog.config"
+                : $"nlog.{environment.EnvironmentName}.config");
         return services.AddSingleton(_ => factory.GetLogger("Info"))
             .AddSingleton(_ => factory.GetLogger("Error"));
     }
@@ -82,16 +81,17 @@ internal static class DependencyInjectionExtension
 
     internal static IServiceCollection InjectBusinesses(this IServiceCollection services) =>
         services.Scan(scan =>
-                scan.FromAssembliesOf(typeof(IBaseBusiness<BaseEntity, IBaseDto>))
-                    .AddClasses(classes =>
-                        classes.AssignableTo(typeof(IBaseBusiness<BaseEntity, IBaseDto>)))
-                    .AsImplementedInterfaces()
-                    .WithScopedLifetime()
-                    .AddClasses(classes =>
-                        classes.Where(predicate =>
-                            predicate.Name.EndsWith("Business") && !predicate.IsAssignableTo(typeof(IBaseBusiness<BaseEntity, IBaseDto>))))
-                    .AsSelf()
-                    .WithScopedLifetime());
+            scan.FromAssembliesOf(typeof(IBaseBusiness<>))
+                .AddClasses(classes =>
+                    classes.AssignableTo(typeof(IBaseBusiness<>)))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+                .AddClasses(classes =>
+                    classes.Where(predicate =>
+                        predicate.Name.EndsWith("Business") &&
+                        !predicate.IsAssignableTo(typeof(IBaseBusiness<>))))
+                .AsSelf()
+                .WithScopedLifetime());
 
     internal static IServiceCollection InjectContentCompression(this IServiceCollection services) =>
         services.Configure<GzipCompressionProviderOptions>

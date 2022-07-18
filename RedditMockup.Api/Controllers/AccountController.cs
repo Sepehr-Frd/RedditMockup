@@ -20,46 +20,26 @@ public class AccountController : ControllerBase
 
     private readonly UserBusiness _userBusiness;
 
-    private readonly ProfileBusiness _profileBusiness;
-
-    public AccountController(AccountBusiness accountBusiness, UserBusiness userBusiness, ProfileBusiness profileBusiness)
+    public AccountController(AccountBusiness accountBusiness, UserBusiness userBusiness)
     {
         _accountBusiness = accountBusiness;
         _userBusiness = userBusiness;
-        _profileBusiness = profileBusiness;
     }
 
     [HttpPost]
-    [Route("Signup")]
-    [AllowAnonymous]
-    public async Task<SamanSalamatResponse> CreateAccountAsync([FromQuery] UserDto signup, CancellationToken cancellationToken) =>
-        (await _userBusiness.CreateAsync(signup, cancellationToken))!;
-
-
-    [HttpPost]
     [Route("Login")]
-    [AllowAnonymous]
     public async Task<SamanSalamatResponse> LoginAsync([FromQuery] LoginDto login, CancellationToken cancellationToken) =>
         await _accountBusiness.LoginAsync(login, HttpContext, cancellationToken);
 
+    [Authorization]
     [HttpGet]
     public async Task<List<UserViewModel>> GetAllUsersAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken) =>
         await _accountBusiness.LoadAllUsersViewModelAsync(sieveModel, cancellationToken);
 
+    [Authorization]
     [HttpGet]
     [Route("Logout")]
     public async Task<SamanSalamatResponse> Logout() =>
-        await _accountBusiness.LogoutAsync(HttpContext);
-
-    [Authorization]
-    [HttpPost]
-    [Route("UpdateProfile")]
-    public async Task<SamanSalamatResponse?> UpdateProfileAsync([FromQuery] ProfileDto profileDto, CancellationToken cancellationToken) =>
-        await _profileBusiness.UpdateAsync(profileDto, HttpContext, cancellationToken);
-
-    [Authorization]
-    [HttpDelete]
-    public async Task<SamanSalamatResponse?> DeleteAccount(LoginDto loginDto, CancellationToken cancellationToken) =>
-        await _userBusiness.DeleteAsync(loginDto, cancellationToken);
+        await AccountBusiness.LogoutAsync(HttpContext);
 
 }

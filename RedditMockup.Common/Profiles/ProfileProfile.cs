@@ -6,13 +6,7 @@ public class ProfileProfile : AutoMapper.Profile
 {
     public ProfileProfile()
     {
-        CreateMap<ProfileDto, Model.Entities.Profile>(AutoMapper.MemberList.None)
-        .ForMember(destination => destination.Bio,
-            option =>
-                option.MapFrom(source => source.Bio))
-        .ForMember(destination => destination.Email,
-            option =>
-                option.MapFrom(source => source.Email))
+        CreateMap<Model.Entities.Profile, ProfileDto>()
         .ReverseMap();
     }
 }

@@ -1,6 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Collections;
+using AutoMapper;
 using RedditMockup.Business.Contracts;
-using RedditMockup.Common.Contracts;
 using RedditMockup.Common.Dtos;
 using RedditMockup.DataAccess.Contracts;
 using RedditMockup.Model.Entities;
@@ -9,9 +9,8 @@ using Sieve.Models;
 namespace RedditMockup.Business.Base;
 
 
-public class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
+public class BaseBusiness<T, DTO> : IBaseBusiness<T>
     where T : BaseEntity
-    where DTO : IBaseDto
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -26,30 +25,31 @@ public class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
         _mapper = mapper;
     }
 
-    public async Task<SamanSalamatResponse?> CreateAsync(DTO dto, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> CreateAsync(T t, CancellationToken cancellationToken = new())
     {
-        var baseEntity = _mapper.Map<T>(dto);
-        var baseEntityInstance = await _repository.CreateAsync(baseEntity, cancellationToken);
+
+        var entity = await _repository.CreateAsync(t, cancellationToken);
 
         await _unitOfWork.CommitAsync(cancellationToken);
 
-        var result = _mapper.Map<DTO>(baseEntityInstance);
+        var response = _mapper.Map<DTO>(entity);
 
         return new SamanSalamatResponse
         {
-            Data = result,
+            Data = response,
             IsSuccess = true,
             Message = "Entity Saved"
         };
 
     }
 
-    public async Task<SamanSalamatResponse<List<DTO>>?> LoadAllAsync(SieveModel model, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse<IEnumerable>?> LoadAllAsync(SieveModel sieveModel, CancellationToken cancellationToken = new())
     {
-        var data = await _repository.LoadAllAsync(model, null, cancellationToken);
+        var data = await _repository.LoadAllAsync(sieveModel, null, cancellationToken);
+
         var result = _mapper.Map<List<DTO>>(data);
 
-        return new SamanSalamatResponse<List<DTO>>
+        return new SamanSalamatResponse<IEnumerable>
         {
             Data = result,
             Message = "Data Loaded",
@@ -57,10 +57,11 @@ public class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
         };
     }
 
-    public async Task<SamanSalamatResponse?> UpdateAsync(DTO dto, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> UpdateAsync(T t, CancellationToken cancellationToken = new())
     {
-        var baseEntity = _mapper.Map<T>(dto);
-        await _repository.UpdateAsync(baseEntity, cancellationToken);
+
+        await _repository.UpdateAsync(t, cancellationToken);
+
         await _unitOfWork.CommitAsync(cancellationToken);
 
         return new SamanSalamatResponse
@@ -70,27 +71,9 @@ public class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
         };
     }
 
-    public async Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken = new())
-    {
-        SieveModel sieveModel = new()
-        {
-            Filters = $"Id=={id}"
-        };
-        
-        var entities = await _repository.LoadAllAsync(sieveModel, null, cancellationToken);
-
-        var entity = entities.FirstOrDefault();
-
-        if (entity is null)
-        {
-            return new SamanSalamatResponse()
-            {
-                IsSuccess = false,
-                Message = "No instance was found with the given id"
-            };
-        }
-
-        await _repository.DeleteAsync(entity, cancellationToken);
+    public async Task<SamanSalamatResponse?> DeleteAsync(T t, CancellationToken cancellationToken = new())
+    {   
+        await _repository.DeleteAsync(t, cancellationToken);
 
         await _unitOfWork.CommitAsync(cancellationToken);
 
@@ -100,4 +83,5 @@ public class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
             Message = "Entity Deleted"
         };
     }
+
 }

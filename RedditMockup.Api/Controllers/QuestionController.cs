@@ -13,7 +13,7 @@ public class QuestionController : BaseController<Question, QuestionDto>
     private readonly QuestionBusiness _questionBusiness;
 
 
-    public QuestionController(IBaseBusiness<Question, QuestionDto> business) : base(business)
+    public QuestionController(IBaseBusiness<QuestionDto> business) : base(business)
     {
         _questionBusiness = (QuestionBusiness)business;
     }
@@ -22,19 +22,19 @@ public class QuestionController : BaseController<Question, QuestionDto>
     [Route("id")]
     [AllowAnonymous]
     public async Task<QuestionDto?> GetQuestionByIdAsync([FromQuery] int id, CancellationToken cancellationToken) =>
-        await _questionBusiness.GetByIdAsync(id, cancellationToken);
+        await _questionBusiness.LoadByIdAsync(id, cancellationToken);
 
     [HttpGet]
     [Route("Answers")]
     [AllowAnonymous]
     public async Task<SamanSalamatResponse?> GetAnswersAsync([FromQuery] int questionId, CancellationToken cancellationToken) =>
-        await _questionBusiness.GetAnswersAsync(questionId, cancellationToken);
+        await _questionBusiness.LoadAnswersAsync(questionId, cancellationToken);
 
     [HttpGet]
     [Route("Votes")]
     [AllowAnonymous]
     public async Task<SamanSalamatResponse?> GetVotesAsync([FromQuery] int questionId, CancellationToken cancellationToken) =>
-        await _questionBusiness.GetVotesAsync(questionId, cancellationToken);
+        await _questionBusiness.LoadVotesAsync(questionId, cancellationToken);
 
     [HttpPut]
     public async Task<SamanSalamatResponse?> UpdateQuestionAsync([FromQuery] int questionId, QuestionDto questionDto, CancellationToken cancellationToken) =>

@@ -12,7 +12,7 @@ public class AnswerController : BaseController<Answer, AnswerDto>
 {
     private readonly AnswerBusiness _answerBusiness;
 
-    public AnswerController(IBaseBusiness<Answer, AnswerDto> business) : base(business)
+    public AnswerController(IBaseBusiness<AnswerDto> business) : base(business)
     {
         _answerBusiness = (AnswerBusiness)business;
     }
@@ -23,7 +23,7 @@ public class AnswerController : BaseController<Answer, AnswerDto>
 
     [Authorization]
     public async new Task<SamanSalamatResponse?> CreateAsync([FromQuery] AnswerDto dto, CancellationToken cancellationToken) =>
-        await _answerBusiness.SubmitAnswerAsync(dto, HttpContext, cancellationToken);
+        await _answerBusiness.CreateAsync(dto, HttpContext, cancellationToken);
 
     [Authorization]
     [HttpPost]

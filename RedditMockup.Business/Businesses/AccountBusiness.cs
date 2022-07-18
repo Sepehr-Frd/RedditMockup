@@ -17,35 +17,64 @@ namespace RedditMockup.Business.Businesses;
 public class AccountBusiness
 {
     private readonly IUnitOfWork _unitOfWork;
+
     private readonly UserRepository _userRepository;
+
+    private readonly UserBusiness _userBusiness;
+
     private readonly IMapper _mapper;
 
-    public AccountBusiness(IUnitOfWork unitOfWork, IMapper mapper)
+    public AccountBusiness(IUnitOfWork unitOfWork, IMapper mapper, UserBusiness userBusiness)
     {
         _unitOfWork = unitOfWork;
         _userRepository = unitOfWork.UserRepository!;
+        _userBusiness = userBusiness;
         _mapper = mapper;
+    }
+
+    private async Task<bool> IsUsernameAndPasswordValidAsync(LoginDto login, CancellationToken cancellationToken = new())
+    {
+        SieveModel sieveModel = new()
+        {
+            Filters = $"Username=={login.Username!}, Password=={login.Password!.GetHashStringAsync()}"
+        };
+
+        var users = await _userRepository.LoadAllAsync(sieveModel, null, cancellationToken);
+
+        return users.Count > 0;
+    }
+
+    private static bool IsSignedIn(HttpContext httpContext) =>
+        httpContext.User?.FindFirstValue(ClaimTypes.NameIdentifier) is not null;
+
+    private async Task<User?> LoadByUsernameAsync(string username, CancellationToken cancellationToken = new())
+    {
+        SieveModel sieveModel = new()
+        {
+            Filters = $"Username=={username}"
+        };
+
+        var users = await _userRepository.LoadAllAsync(sieveModel, null, cancellationToken);
+
+        if (users.Count == 0)
+        {
+            return null;
+        }
+
+        return users.Single();
     }
 
     public async Task<List<UserViewModel>> LoadAllUsersViewModelAsync(SieveModel sieveModel, CancellationToken cancellationToken = new()) =>
             _mapper.Map<List<UserViewModel>>(await _userRepository.LoadAllAsync(sieveModel,
-                include => include
-                    .Include(x => x.Person)
-                    .Include(x => x.UserRoles)!
-                    .ThenInclude(x => x.Role),
-                cancellationToken));
-
-    public async Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = new()) =>
-        !await _userRepository.UsernameExistsAsync(username, cancellationToken);
-
-    public async Task<bool> IsUsernameAndPasswordValidAsync(LoginDto login, CancellationToken cancellationToken = new()) =>
-        await _userRepository.IsUsernameAndPasswordValidAsync(login.Username!, await login.Password!.GetHashStringAsync(), cancellationToken);
-
-    public async Task<User> LoadByUsernameAsync(string username, CancellationToken cancellationToken = new()) =>
-        await _userRepository.LoadByUsernameAsync(username, cancellationToken);
-
-    private static bool IsSignedIn(HttpContext httpContext) =>
-        httpContext.User?.FindFirstValue(ClaimTypes.NameIdentifier) != null;
+            include => include
+                .Include(x => x.Person)
+                .Include(x => x.Answers)
+                .Include(x => x.Questions)
+                .Include(x => x.Profile)
+                .Include(x => x.Username)
+                .Include(x => x.UserRoles)!
+                .ThenInclude(x => x.Role),
+            cancellationToken));
 
     public async Task<SamanSalamatResponse> LoginAsync(LoginDto login, HttpContext httpContext, CancellationToken cancellationToken = new())
     {
@@ -54,7 +83,7 @@ public class AccountBusiness
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = "You are already signed in!"
+                Message = "You are already signed in"
             };
         }
 
@@ -65,16 +94,15 @@ public class AccountBusiness
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = "Username and/or password not correct!"
+                Message = "Username and/or password not correct"
             };
-
         }
 
         var user = await LoadByUsernameAsync(login.Username!, cancellationToken);
 
         var claims = new List<Claim>
             {
-                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.NameIdentifier, user!.Id.ToString()),
                 new("FullName", user.Person!.FullName),
                 new("Username", user.Username!)
             };
@@ -86,7 +114,7 @@ public class AccountBusiness
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
 
-        var properties = new AuthenticationProperties
+        var properties = new AuthenticationProperties()
         {
             IsPersistent = login.RememberMe
         };
@@ -96,11 +124,11 @@ public class AccountBusiness
         return new SamanSalamatResponse()
         {
             IsSuccess = true,
-            Message = "Successfully signed in."
-        }; ;
+            Message = "Successfully logged in"
+        };
     }
 
-    public async Task<SamanSalamatResponse> LogoutAsync(HttpContext httpContext)
+    public static async Task<SamanSalamatResponse> LogoutAsync(HttpContext httpContext)
     {
 
         if (!IsSignedIn(httpContext))
@@ -108,7 +136,7 @@ public class AccountBusiness
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = "You are not signed in!"
+                Message = "Already logged out"
             };
         }
 
@@ -117,7 +145,8 @@ public class AccountBusiness
         return new SamanSalamatResponse()
         {
             IsSuccess = true,
-            Message = "Successfully signed out."
+            Message = "Successfully logged out"
         };
     }
+
 }

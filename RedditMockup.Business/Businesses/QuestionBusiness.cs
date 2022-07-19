@@ -31,17 +31,13 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
 
     }
 
-    public async Task<SamanSalamatResponse?> CreateAsync(QuestionDto dto, HttpContext httpContext, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> CreateAsync(QuestionDto dto, CancellationToken cancellationToken = new())
     {
         var question = _mapper.Map<Question>(dto);
 
-        var stringUserId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        int userId = int.Parse(stringUserId);
-
-        question.UserId = userId;
-
-        var user = (await _userBusiness.LoadByIdAsync(userId, cancellationToken))!.Data!;
+        var user = await _userBusiness.LoadModelByIdAsync(dto.UserId, cancellationToken);
+        
+        question.UserId = user!.Id;
 
         user.Score += 1;
 

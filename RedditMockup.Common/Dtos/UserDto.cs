@@ -11,4 +11,6 @@ public class UserDto
 
     public string? Password { get; set; }
 
+    public ProfileDto? Profile { get; set; }
+
 }

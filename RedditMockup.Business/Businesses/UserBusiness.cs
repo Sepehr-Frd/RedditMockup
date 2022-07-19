@@ -64,7 +64,7 @@ public class UserBusiness : BaseBusiness<User, UserDto>
     }
 
 
-    private async Task<User?> LoadModelByIdAsync(int id, CancellationToken cancellationToken = new())
+    public async Task<User?> LoadModelByIdAsync(int id, CancellationToken cancellationToken = new())
     {
 
         SieveModel sieveModel = new()
@@ -127,83 +127,39 @@ public class UserBusiness : BaseBusiness<User, UserDto>
 
     }
 
-    public async Task<SamanSalamatResponse?> UpdateProfileAsync(ProfileDto dto, HttpContext httpContext, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> UpdateAsync(int id, UserDto dto, CancellationToken cancellationToken = new())
     {
-        var stringUserId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        int userId = int.Parse(stringUserId);
-
-        var user = await LoadModelByIdAsync(userId, cancellationToken);
+        var user = await LoadModelByIdAsync(id, cancellationToken);
 
         if (user is null)
         {
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = "No logged in user found"
+                Message = $"No user found with the ID of {id}"
             };
         }
 
-        _mapper.Map(dto, user.Profile);
+        _mapper.Map(dto, user);
 
-        await _profileRepository.UpdateAsync(user.Profile!, cancellationToken);
-
-        await _unitOfWork.CommitAsync(cancellationToken);
-
-        return new SamanSalamatResponse()
-        {
-            Data = dto,
-            IsSuccess = true
-        };
+        return await UpdateAsync(user, cancellationToken);
 
     }
 
-    public async Task<SamanSalamatResponse?> DeleteAsync(LoginDto loginDto, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken = new())
     {
-        var isValid = await IsUsernameAndPasswordValidAsync(loginDto, cancellationToken);
+        var user = await LoadModelByIdAsync(id, cancellationToken);
 
-        if (!isValid)
+        if (user is null)
         {
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = "Username and/or password invalid"
+                Message = $"No user found with id of {id}"
             };
         }
 
-        var user = await LoadByUsernameAsync(loginDto.Username!, cancellationToken);
-
-        return await DeleteAsync(user!, cancellationToken);
+        return await DeleteAsync(user, cancellationToken);
     }
-
-    private async Task<User?> LoadByUsernameAsync(string username, CancellationToken cancellationToken = new())
-    {
-        SieveModel sieveModel = new()
-        {
-            Filters = $"Username=={username}"
-        };
-
-        var users = await _userRepository.LoadAllAsync(sieveModel, null, cancellationToken);
-
-        if (users.Count == 0)
-        {
-            return null;
-        }
-
-        return users.Single();
-    }
-
-    private async Task<bool> IsUsernameAndPasswordValidAsync(LoginDto login, CancellationToken cancellationToken = new())
-    {
-        SieveModel sieveModel = new()
-        {
-            Filters = $"Username=={login.Username!}, Password=={login.Password!.GetHashStringAsync()}"
-        };
-
-        var users = await _userRepository.LoadAllAsync(sieveModel, null, cancellationToken);
-
-        return users.Count > 0;
-    }
-
 
 }

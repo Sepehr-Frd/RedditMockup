@@ -22,7 +22,6 @@ public class BaseController<T, DTO> : ControllerBase, IBaseController<DTO>
     public BaseController(IBaseBusiness<T> business) =>
         _business = business;
 
-
     [HttpGet]
     [AllowAnonymous]
     public async Task<SamanSalamatResponse<IEnumerable>?> GetAllAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken) =>
@@ -40,4 +39,15 @@ public class BaseController<T, DTO> : ControllerBase, IBaseController<DTO>
     public void Options() =>
         Response.Headers.Add("Allow", "POST,PUT,DELETE,GET");
 
+    [Route("{id:int}")]
+    [HttpGet]
+    Task<SamanSalamatResponse?> GetByIdAsync([FromQuery] int id, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<SamanSalamatResponse?> IBaseController<DTO>.UpdateAsync(int id, DTO dto, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }

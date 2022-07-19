@@ -14,9 +14,8 @@ public interface IBaseController<DTO>
 
     Task<SamanSalamatResponse?> GetByIdAsync(int id, CancellationToken cancellationToken);
 
-    Task<SamanSalamatResponse?> UpdateAsync(DTO dto, HttpContext httpContext, CancellationToken cancellationToken);
+    Task<SamanSalamatResponse?> UpdateAsync(int id, DTO dto, CancellationToken cancellationToken);
 
-    
     Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken);
 
     void Options();

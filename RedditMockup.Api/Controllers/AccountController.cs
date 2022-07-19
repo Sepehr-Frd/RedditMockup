@@ -18,18 +18,10 @@ public class AccountController : ControllerBase
 {
     private readonly AccountBusiness _accountBusiness;
 
-    private readonly UserBusiness _userBusiness;
-
-    public AccountController(AccountBusiness accountBusiness, UserBusiness userBusiness)
+    public AccountController(AccountBusiness accountBusiness)
     {
         _accountBusiness = accountBusiness;
-        _userBusiness = userBusiness;
     }
-
-    [HttpPost]
-    [Route("Login")]
-    public async Task<SamanSalamatResponse> LoginAsync([FromQuery] LoginDto login, CancellationToken cancellationToken) =>
-        await _accountBusiness.LoginAsync(login, HttpContext, cancellationToken);
 
     [Authorization]
     [HttpGet]
@@ -41,5 +33,11 @@ public class AccountController : ControllerBase
     [Route("Logout")]
     public async Task<SamanSalamatResponse> Logout() =>
         await AccountBusiness.LogoutAsync(HttpContext);
+
+    [HttpPost]
+    [Route("Login")]
+    public async Task<SamanSalamatResponse> LoginAsync([FromQuery] LoginDto login, CancellationToken cancellationToken) =>
+       await _accountBusiness.LoginAsync(login, HttpContext, cancellationToken);
+
 
 }

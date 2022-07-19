@@ -9,7 +9,7 @@ using Sieve.Models;
 namespace RedditMockup.Business.Base;
 
 
-public class BaseBusiness<T, DTO> : IBaseBusiness<T>
+public class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
     where T : BaseEntity
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -18,14 +18,14 @@ public class BaseBusiness<T, DTO> : IBaseBusiness<T>
 
     private readonly IMapper _mapper;
 
-    public BaseBusiness(IUnitOfWork unitOfWork, IBaseRepository<T> repository, IMapper mapper)
+    protected BaseBusiness(IUnitOfWork unitOfWork, IBaseRepository<T> repository, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _repository = repository;
         _mapper = mapper;
     }
 
-    public async Task<SamanSalamatResponse?> CreateAsync(T t, CancellationToken cancellationToken = new())
+    protected async Task<SamanSalamatResponse?> CreateAsync(T t, CancellationToken cancellationToken = new())
     {
 
         var entity = await _repository.CreateAsync(t, cancellationToken);
@@ -43,6 +43,33 @@ public class BaseBusiness<T, DTO> : IBaseBusiness<T>
 
     }
 
+    protected async Task<SamanSalamatResponse?> UpdateAsync(T t, CancellationToken cancellationToken = new())
+    {
+
+        await _repository.UpdateAsync(t, cancellationToken);
+
+        await _unitOfWork.CommitAsync(cancellationToken);
+
+        return new SamanSalamatResponse
+        {
+            IsSuccess = true,
+            Message = "Entity Updated"
+        };
+    }
+
+    protected async Task<SamanSalamatResponse?> DeleteAsync(T t, CancellationToken cancellationToken = new())
+    {   
+        await _repository.DeleteAsync(t, cancellationToken);
+
+        await _unitOfWork.CommitAsync(cancellationToken);
+
+        return new SamanSalamatResponse
+        {
+            IsSuccess = true,
+            Message = "Entity Deleted"
+        };
+    }
+
     public async Task<SamanSalamatResponse<IEnumerable>?> LoadAllAsync(SieveModel sieveModel, CancellationToken cancellationToken = new())
     {
         var data = await _repository.LoadAllAsync(sieveModel, null, cancellationToken);
@@ -57,31 +84,32 @@ public class BaseBusiness<T, DTO> : IBaseBusiness<T>
         };
     }
 
-    public async Task<SamanSalamatResponse?> UpdateAsync(T t, CancellationToken cancellationToken = new())
+    Task<SamanSalamatResponse?> IBaseBusiness<T, DTO>.CreateAsync(T t, CancellationToken cancellationToken)
     {
-
-        await _repository.UpdateAsync(t, cancellationToken);
-
-        await _unitOfWork.CommitAsync(cancellationToken);
-
-        return new SamanSalamatResponse
-        {
-            IsSuccess = true,
-            Message = "Entity Updated"
-        };
+        throw new NotImplementedException();
     }
 
-    public async Task<SamanSalamatResponse?> DeleteAsync(T t, CancellationToken cancellationToken = new())
-    {   
-        await _repository.DeleteAsync(t, cancellationToken);
-
-        await _unitOfWork.CommitAsync(cancellationToken);
-
-        return new SamanSalamatResponse
-        {
-            IsSuccess = true,
-            Message = "Entity Deleted"
-        };
+    public virtual async Task<SamanSalamatResponse?> UpdateAsync(int id, DTO dto, CancellationToken cancellationToken = new())
+    {
     }
 
+    Task<SamanSalamatResponse?> IBaseBusiness<T, DTO>.DeleteAsync(T t, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<SamanSalamatResponse?> IBaseBusiness<T, DTO>.CreateAsync(DTO dto, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<SamanSalamatResponse?> IBaseBusiness<T, DTO>.UpdateAsync(int id, DTO dto, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<SamanSalamatResponse?> IBaseBusiness<T, DTO>.DeleteAsync(int id, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }

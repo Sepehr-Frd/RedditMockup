@@ -57,32 +57,28 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
         return answers.Single();
     }
 
-    public async Task<SamanSalamatResponse?> CreateAsync(AnswerDto answerDto, HttpContext httpContext, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> CreateAsync(AnswerDto dto, CancellationToken cancellationToken = new())
     {
-        var question = await _questionBusiness.LoadModelByIdAsync(answerDto.QuestionId, cancellationToken);
+        var question = await _questionBusiness.LoadModelByIdAsync(dto.QuestionId, cancellationToken);
 
         if (question is null)
         {
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = $"No question found with id of {answerDto.QuestionId}"
+                Message = $"No question found with id of {dto.QuestionId}"
             };
         }
 
-        var answer = _mapper.Map<Answer>(answerDto);
+        var answer = _mapper.Map<Answer>(dto);
 
-        var stringUserId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        int userId = int.Parse(stringUserId);
-
-        var answeringUser = (await _userBusiness.LoadByIdAsync(userId, cancellationToken))!.Data!;
+        var user = await _userBusiness.LoadModelByIdAsync(dto.UserId);
 
         answer.QuestionId = question.Id;
 
-        answeringUser.Score += 1;
+        user!.Score += 1;
 
-        _userRepository.UpdateAsync(answeringUser);
+        await _userRepository.UpdateAsync(user, cancellationToken);
 
         return await CreateAsync(answer, cancellationToken);
     }
@@ -145,9 +141,9 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
         };
     }
 
-    public async Task<SamanSalamatResponse?> UpdateAsync(AnswerDto answerDto, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> UpdateAsync(int id, AnswerDto dto, CancellationToken cancellationToken = new())
     {
-        var answer = await LoadModelByIdAsync(answerDto.Id, cancellationToken);
+        var answer = await LoadModelByIdAsync(id, cancellationToken);
 
         if (answer is null)
         {
@@ -158,7 +154,7 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             };
         }
 
-        _mapper.Map(answerDto, answer);
+        _mapper.Map(dto, answer);
 
         return await UpdateAsync(answer, cancellationToken);
 

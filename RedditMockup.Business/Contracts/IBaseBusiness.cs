@@ -1,6 +1,6 @@
-﻿using System.Collections;
-using RedditMockup.Common.Dtos;
+﻿using RedditMockup.Common.Dtos;
 using Sieve.Models;
+using System.Collections;
 
 namespace RedditMockup.Business.Contracts;
 
@@ -15,6 +15,8 @@ public interface IBaseBusiness<T, DTO>
     Task<SamanSalamatResponse?> DeleteAsync(T t, CancellationToken cancellationToken);
 
     Task<SamanSalamatResponse?> CreateAsync(DTO dto, CancellationToken cancellationToken);
+
+    Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken);
 
     Task<SamanSalamatResponse?> UpdateAsync(int id, DTO dto, CancellationToken cancellationToken);
 

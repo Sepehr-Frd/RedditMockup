@@ -12,22 +12,12 @@ public class AnswerController : BaseController<Answer, AnswerDto>
 {
     private readonly AnswerBusiness _answerBusiness;
 
-    public AnswerController(IBaseBusiness<AnswerDto> business) : base(business)
-    {
+    public AnswerController(IBaseBusiness<Answer, AnswerDto> business) : base(business) =>
         _answerBusiness = (AnswerBusiness)business;
-    }
-
-    [HttpPut]
-    public async Task<SamanSalamatResponse?> UpdateAnswerAsync([FromQuery] int answerId, AnswerDto answerDto, CancellationToken cancellationToken) =>
-        await _answerBusiness.UpdateAsync(answerDto, cancellationToken);
-
-    [Authorization]
-    public async new Task<SamanSalamatResponse?> CreateAsync([FromQuery] AnswerDto dto, CancellationToken cancellationToken) =>
-        await _answerBusiness.CreateAsync(dto, HttpContext, cancellationToken);
 
     [Authorization]
     [HttpPost]
     [Route("SubmitVote")]
     public async Task<SamanSalamatResponse?> SubmitVoteAsync([FromQuery] int answerId, bool kind, CancellationToken cancellationToken) =>
-        await _answerBusiness.SubmitVoteAsync(answerId, kind, cancellationToken);
+    await _answerBusiness.SubmitVoteAsync(answerId, kind, cancellationToken);
 }

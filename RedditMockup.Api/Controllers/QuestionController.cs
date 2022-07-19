@@ -13,16 +13,10 @@ public class QuestionController : BaseController<Question, QuestionDto>
     private readonly QuestionBusiness _questionBusiness;
 
 
-    public QuestionController(IBaseBusiness<QuestionDto> business) : base(business)
+    public QuestionController(IBaseBusiness<Question, QuestionDto> business) : base(business)
     {
         _questionBusiness = (QuestionBusiness)business;
     }
-
-    [HttpGet]
-    [Route("id")]
-    [AllowAnonymous]
-    public async Task<QuestionDto?> GetQuestionByIdAsync([FromQuery] int id, CancellationToken cancellationToken) =>
-        await _questionBusiness.LoadByIdAsync(id, cancellationToken);
 
     [HttpGet]
     [Route("Answers")]
@@ -35,13 +29,6 @@ public class QuestionController : BaseController<Question, QuestionDto>
     [AllowAnonymous]
     public async Task<SamanSalamatResponse?> GetVotesAsync([FromQuery] int questionId, CancellationToken cancellationToken) =>
         await _questionBusiness.LoadVotesAsync(questionId, cancellationToken);
-
-    [HttpPut]
-    public async Task<SamanSalamatResponse?> UpdateQuestionAsync([FromQuery] int questionId, QuestionDto questionDto, CancellationToken cancellationToken) =>
-        await _questionBusiness.UpdateAsync(questionId, questionDto, cancellationToken);
-
-    public async new Task<SamanSalamatResponse?> CreateAsync([FromQuery] QuestionDto dto, CancellationToken cancellationToken) =>
-        await _questionBusiness.CreateAsync(dto, HttpContext, cancellationToken);
 
     [HttpPost]
     [Route("SubmitVote")]

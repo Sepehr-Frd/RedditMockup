@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RedditMockup.Business.Base;
 using RedditMockup.Common.Dtos;
@@ -35,29 +33,7 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
         _mapper = mapper;
     }
 
-    private async Task<Answer?> LoadModelByIdAsync(int id, CancellationToken cancellationToken = new())
-    {
-        SieveModel sieveModel = new()
-        {
-            Filters = $"Id=={id}"
-        };
-
-        var answers = await _answerRepository.LoadAllAsync(sieveModel,
-            include => include
-                .Include(x => x.AnsweringUser)
-                .Include(x => x.Question)
-                .Include(x => x.Votes),
-            cancellationToken);
-
-        if (answers.Count == 0)
-        {
-            return null;
-        }
-
-        return answers.Single();
-    }
-
-    public async Task<SamanSalamatResponse?> CreateAsync(AnswerDto dto, CancellationToken cancellationToken = new())
+    public override async Task<SamanSalamatResponse?> CreateAsync(AnswerDto dto, CancellationToken cancellationToken = new())
     {
         var question = await _questionBusiness.LoadModelByIdAsync(dto.QuestionId, cancellationToken);
 
@@ -83,7 +59,29 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
         return await CreateAsync(answer, cancellationToken);
     }
 
-    public async Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken = new())
+    private async Task<Answer?> LoadModelByIdAsync(int id, CancellationToken cancellationToken = new())
+    {
+        SieveModel sieveModel = new()
+        {
+            Filters = $"Id=={id}"
+        };
+
+        var answers = await _answerRepository.LoadAllAsync(sieveModel,
+            include => include
+                .Include(x => x.AnsweringUser)
+                .Include(x => x.Question)
+                .Include(x => x.Votes),
+            cancellationToken);
+
+        if (answers.Count == 0)
+        {
+            return null;
+        }
+
+        return answers.Single();
+    }
+
+    public override async Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken = new())
     {
 
         var answer = await LoadModelByIdAsync(id, cancellationToken);
@@ -104,6 +102,42 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             Data = response,
             IsSuccess = true
         };
+    }
+
+    public override async Task<SamanSalamatResponse?> UpdateAsync(int id, AnswerDto dto, CancellationToken cancellationToken = new())
+    {
+        var answer = await LoadModelByIdAsync(id, cancellationToken);
+
+        if (answer is null)
+        {
+            return new SamanSalamatResponse()
+            {
+                IsSuccess = false,
+                Message = "No answer found with given answer ID"
+            };
+        }
+
+        _mapper.Map(dto, answer);
+
+        return await UpdateAsync(answer, cancellationToken);
+
+    }
+
+    public override async Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken = new())
+    {
+        var answer = await LoadModelByIdAsync(id, cancellationToken);
+
+        if (answer is null)
+        {
+            return new SamanSalamatResponse()
+            {
+                IsSuccess = false,
+                Message = $"No answer found with id of {id}"
+            };
+        }
+
+        return await DeleteAsync(answer, cancellationToken);
+
     }
 
     public async Task<SamanSalamatResponse?> SubmitVoteAsync(int id, bool kind, CancellationToken cancellationToken = new())
@@ -139,42 +173,6 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             IsSuccess = true,
             Message = $"{(kind ? "Up" : "Down")}vote submitted"
         };
-    }
-
-    public async Task<SamanSalamatResponse?> UpdateAsync(int id, AnswerDto dto, CancellationToken cancellationToken = new())
-    {
-        var answer = await LoadModelByIdAsync(id, cancellationToken);
-
-        if (answer is null)
-        {
-            return new SamanSalamatResponse()
-            {
-                IsSuccess = false,
-                Message = "No answer found with given answer ID"
-            };
-        }
-
-        _mapper.Map(dto, answer);
-
-        return await UpdateAsync(answer, cancellationToken);
-
-    }
-
-    public async Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken = new())
-    {
-        var answer = await LoadModelByIdAsync(id, cancellationToken);
-
-        if (answer is null)
-        {
-            return new SamanSalamatResponse()
-            {
-                IsSuccess = false,
-                Message = $"No answer found with id of {id}"
-            };
-        }
-
-        return await DeleteAsync(answer, cancellationToken);
-
     }
 
 }

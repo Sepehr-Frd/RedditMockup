@@ -1,7 +1,6 @@
-﻿using System.Collections;
-using Microsoft.AspNetCore.Http;
-using RedditMockup.Common.Dtos;
+﻿using RedditMockup.Common.Dtos;
 using Sieve.Models;
+using System.Collections;
 
 namespace RedditMockup.Api.Contracts;
 
@@ -20,3 +19,13 @@ public interface IBaseController<DTO>
 
     void Options();
 }
+
+
+/*
+ * GetAllAsync(sievemodel) //Admin
+ * GetByIdAsync(int id) Admin
+ * AddAsync(T) Admin
+ * Update(T) Admin
+ * Delete(int) Admin
+ *
+ */

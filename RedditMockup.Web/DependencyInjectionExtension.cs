@@ -1,6 +1,4 @@
-﻿using System.IO.Compression;
-using System.Text.Json.Serialization;
-using FluentValidation.AspNetCore;
+﻿using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +12,8 @@ using RedditMockup.DataAccess.Context;
 using RedditMockup.DataAccess.Contracts;
 using RedditMockup.Model.Entities;
 using Sieve.Services;
+using System.IO.Compression;
+using System.Text.Json.Serialization;
 
 namespace RedditMockup.Web;
 
@@ -81,15 +81,15 @@ internal static class DependencyInjectionExtension
 
     internal static IServiceCollection InjectBusinesses(this IServiceCollection services) =>
         services.Scan(scan =>
-            scan.FromAssembliesOf(typeof(IBaseBusiness<>))
+            scan.FromAssembliesOf(typeof(IBaseBusiness<BaseEntity, object>))
                 .AddClasses(classes =>
-                    classes.AssignableTo(typeof(IBaseBusiness<>)))
+                    classes.AssignableTo(typeof(IBaseBusiness<BaseEntity, object>)))
                 .AsImplementedInterfaces()
                 .WithScopedLifetime()
                 .AddClasses(classes =>
                     classes.Where(predicate =>
                         predicate.Name.EndsWith("Business") &&
-                        !predicate.IsAssignableTo(typeof(IBaseBusiness<>))))
+                        !predicate.IsAssignableTo(typeof(IBaseBusiness<BaseEntity, object>))))
                 .AsSelf()
                 .WithScopedLifetime());
 

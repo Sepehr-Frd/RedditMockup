@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RedditMockup.Business.Base;
 using RedditMockup.Common.Dtos;
@@ -31,12 +29,12 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
 
     }
 
-    public async Task<SamanSalamatResponse?> CreateAsync(QuestionDto dto, CancellationToken cancellationToken = new())
+    public override async Task<SamanSalamatResponse?> CreateAsync(QuestionDto dto, CancellationToken cancellationToken = new())
     {
         var question = _mapper.Map<Question>(dto);
 
         var user = await _userBusiness.LoadModelByIdAsync(dto.UserId, cancellationToken);
-        
+
         question.UserId = user!.Id;
 
         user.Score += 1;
@@ -66,7 +64,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
         return questions.Single();
     }
 
-    public async Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken = new())
+    public override async Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken = new())
     {
         var question = await LoadModelByIdAsync(id, cancellationToken);
 
@@ -100,7 +98,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
                 Message = "No question found with given question ID"
             };
         }
-        
+
         var answers = question.Answers!.ToList();
 
         var response = _mapper.Map<List<AnswerDto>>(answers);
@@ -126,7 +124,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
         }
 
         var votes = question.Votes!.ToList();
-        
+
         var response = _mapper.Map<List<VoteDto>>(votes);
 
         return new SamanSalamatResponse()
@@ -173,7 +171,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
 
     }
 
-    public async Task<SamanSalamatResponse?> UpdateAsync(int id, QuestionDto questionDto, CancellationToken cancellationToken = new())
+    public override async Task<SamanSalamatResponse?> UpdateAsync(int id, QuestionDto questionDto, CancellationToken cancellationToken = new())
     {
         var question = await LoadModelByIdAsync(id, cancellationToken);
 
@@ -192,7 +190,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
 
     }
 
-    public async Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken = new())
+    public override async Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken = new())
     {
         var question = await LoadModelByIdAsync(id, cancellationToken);
 

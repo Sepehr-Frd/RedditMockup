@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RedditMockup.Business.Base;
 using RedditMockup.Common.Dtos;
@@ -30,7 +28,7 @@ public class UserBusiness : BaseBusiness<User, UserDto>
         _mapper = mapper;
     }
 
-    public async Task<SamanSalamatResponse?> CreateAsync(UserDto dto, CancellationToken cancellationToken = default)
+    public override async Task<SamanSalamatResponse?> CreateAsync(UserDto dto, CancellationToken cancellationToken = default)
     {
         var isUsernameValid = !await UsernameExistsAsync(dto.Username!, cancellationToken);
 
@@ -90,7 +88,7 @@ public class UserBusiness : BaseBusiness<User, UserDto>
 
     }
 
-    public async Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken = new())
+    public override async Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken = new())
     {
 
         var user = await LoadModelByIdAsync(id, cancellationToken);
@@ -127,7 +125,7 @@ public class UserBusiness : BaseBusiness<User, UserDto>
 
     }
 
-    public async Task<SamanSalamatResponse?> UpdateAsync(int id, UserDto dto, CancellationToken cancellationToken = new())
+    public override async Task<SamanSalamatResponse?> UpdateAsync(int id, UserDto dto, CancellationToken cancellationToken = new())
     {
         var user = await LoadModelByIdAsync(id, cancellationToken);
 
@@ -146,7 +144,7 @@ public class UserBusiness : BaseBusiness<User, UserDto>
 
     }
 
-    public async Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken = new())
+    public override async Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken = new())
     {
         var user = await LoadModelByIdAsync(id, cancellationToken);
 

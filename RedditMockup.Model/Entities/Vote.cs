@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Sieve.Attributes;
+﻿using Sieve.Attributes;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RedditMockup.Model.Entities;
 

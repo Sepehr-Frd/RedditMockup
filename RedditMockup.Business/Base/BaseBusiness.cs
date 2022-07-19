@@ -1,15 +1,15 @@
-﻿using System.Collections;
-using AutoMapper;
+﻿using AutoMapper;
 using RedditMockup.Business.Contracts;
 using RedditMockup.Common.Dtos;
 using RedditMockup.DataAccess.Contracts;
 using RedditMockup.Model.Entities;
 using Sieve.Models;
+using System.Collections;
 
 namespace RedditMockup.Business.Base;
 
 
-public class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
+public abstract class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
     where T : BaseEntity
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -18,14 +18,14 @@ public class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
 
     private readonly IMapper _mapper;
 
-    protected BaseBusiness(IUnitOfWork unitOfWork, IBaseRepository<T> repository, IMapper mapper)
+    public BaseBusiness(IUnitOfWork unitOfWork, IBaseRepository<T> repository, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _repository = repository;
         _mapper = mapper;
     }
 
-    protected async Task<SamanSalamatResponse?> CreateAsync(T t, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> CreateAsync(T t, CancellationToken cancellationToken = new())
     {
 
         var entity = await _repository.CreateAsync(t, cancellationToken);
@@ -43,7 +43,7 @@ public class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
 
     }
 
-    protected async Task<SamanSalamatResponse?> UpdateAsync(T t, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse?> UpdateAsync(T t, CancellationToken cancellationToken = new())
     {
 
         await _repository.UpdateAsync(t, cancellationToken);
@@ -57,8 +57,8 @@ public class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
         };
     }
 
-    protected async Task<SamanSalamatResponse?> DeleteAsync(T t, CancellationToken cancellationToken = new())
-    {   
+    public async Task<SamanSalamatResponse?> DeleteAsync(T t, CancellationToken cancellationToken = new())
+    {
         await _repository.DeleteAsync(t, cancellationToken);
 
         await _unitOfWork.CommitAsync(cancellationToken);
@@ -84,32 +84,15 @@ public class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
         };
     }
 
-    Task<SamanSalamatResponse?> IBaseBusiness<T, DTO>.CreateAsync(T t, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
 
-    public virtual async Task<SamanSalamatResponse?> UpdateAsync(int id, DTO dto, CancellationToken cancellationToken = new())
-    {
-    }
+    /*-------------------------------------------------------------------*/
 
-    Task<SamanSalamatResponse?> IBaseBusiness<T, DTO>.DeleteAsync(T t, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
+    public abstract Task<SamanSalamatResponse?> CreateAsync(DTO dto, CancellationToken cancellationToken);
 
-    Task<SamanSalamatResponse?> IBaseBusiness<T, DTO>.CreateAsync(DTO dto, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
+    public abstract Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken);
 
-    Task<SamanSalamatResponse?> IBaseBusiness<T, DTO>.UpdateAsync(int id, DTO dto, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
+    public abstract Task<SamanSalamatResponse?> UpdateAsync(int id, DTO dto, CancellationToken cancellationToken);
 
-    Task<SamanSalamatResponse?> IBaseBusiness<T, DTO>.DeleteAsync(int id, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
+    public abstract Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken);
+
 }

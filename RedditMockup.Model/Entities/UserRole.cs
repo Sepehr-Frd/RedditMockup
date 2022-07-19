@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Hoorbakht.RedisService.Contracts;
+﻿using Hoorbakht.RedisService.Contracts;
 using Sieve.Attributes;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RedditMockup.Model.Entities;
 

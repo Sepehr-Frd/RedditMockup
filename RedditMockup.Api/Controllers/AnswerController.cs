@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RedditMockup.Api.Base;
 using RedditMockup.Api.Filters;
 using RedditMockup.Business.Businesses;
@@ -15,9 +16,15 @@ public class AnswerController : BaseController<Answer, AnswerDto>
     public AnswerController(IBaseBusiness<Answer, AnswerDto> business) : base(business) =>
         _answerBusiness = (AnswerBusiness)business;
 
-    //[Authorization]
+    [Authorization]
     [HttpPost]
     [Route("SubmitVote")]
     public async Task<SamanSalamatResponse?> SubmitVoteAsync([FromQuery] int answerId, bool kind, CancellationToken cancellationToken) =>
     await _answerBusiness.SubmitVoteAsync(answerId, kind, cancellationToken);
+
+    [HttpGet]
+    [Route("Votes")]
+    [AllowAnonymous]
+    public async Task<SamanSalamatResponse?> GetVotesAsync([FromQuery] int answerId, CancellationToken cancellationToken) =>
+        await _answerBusiness.LoadVotesAsync(answerId, cancellationToken);
 }

@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using RedditMockup.Business.Base;
 using RedditMockup.Business.Contracts;
@@ -13,7 +15,6 @@ namespace RedditMockup.Business.Businesses;
 public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
 {
     private readonly AnswerRepository _answerRepository;
-    private readonly QuestionRepository _questionRepository;
     private readonly QuestionBusiness _questionBusiness;
     private readonly AnswerVoteRepository _answerVoteRepository;
     private readonly UserRepository _userRepository;
@@ -25,7 +26,6 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
     public AnswerBusiness(IUnitOfWork unitOfWork, IMapper mapper, IBaseBusiness<User, UserDto> userBusiness, IBaseBusiness<Question, QuestionDto> questionBusiness) : base(unitOfWork, unitOfWork.AnswerRepository!, mapper)
     {
         _answerRepository = unitOfWork.AnswerRepository!;
-        _questionRepository = unitOfWork.QuestionRepository!;
         _questionBusiness = (QuestionBusiness)questionBusiness;
         _answerVoteRepository = unitOfWork.AnswerVoteRepository!;
         _userBusiness = (UserBusiness)userBusiness;
@@ -34,22 +34,28 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
         _mapper = mapper;
     }
 
-    public override async Task<SamanSalamatResponse?> CreateAsync(AnswerDto dto, CancellationToken cancellationToken = new())
+    public override async Task<SamanSalamatResponse?> CreateAsync(AnswerDto dto, HttpContext httpContext, CancellationToken
+    cancellationToken
+     = new())
     {
         var question = await _questionBusiness.LoadModelByIdAsync(dto.QuestionId, cancellationToken);
+
+        var stringUserId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var userId = int.Parse(stringUserId);
 
         if (question is null)
         {
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = $"No question found with id of {dto.QuestionId}"
+                Message = $"No question found with ID of {dto.QuestionId}"
             };
         }
 
         var answer = _mapper.Map<Answer>(dto);
 
-        var user = await _userBusiness.LoadModelByIdAsync(dto.UserId, cancellationToken);
+        var user = await _userBusiness.LoadModelByIdAsync(userId, cancellationToken);
 
         answer.QuestionId = question.Id;
 
@@ -67,12 +73,15 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             Filters = $"Id=={id}"
         };
 
-        var answers = await _answerRepository.LoadAllAsync(sieveModel,
-            include => include
-                .Include(x => x.AnsweringUser)
-                .Include(x => x.Question)
-                .Include(x => x.Votes),
-            cancellationToken);
+
+        var answers =
+        await _answerRepository.LoadAllAsync(sieveModel, include => include
+                            .Include(x => x.AnsweringUser)
+                            .Include(x => x.Votes)
+                            .Include(x => x.Question)
+                            .ThenInclude(x => x!.User),
+                            cancellationToken);
+
 
         if (answers.Count == 0)
         {
@@ -80,6 +89,7 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
         }
 
         return answers.Single();
+
     }
 
     public override async Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken = new())
@@ -92,7 +102,7 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = $"No answer found with the ID of {id}"
+                Message = $"No answer found with ID of {id}"
             };
         }
 
@@ -114,7 +124,7 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = "No answer found with given answer ID"
+                Message = $"No answer found with ID of {id}"
             };
         }
 
@@ -150,7 +160,7 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = $"No answer found with id of {id}"
+                Message = $"No answer found with ID of {id}"
             };
         }
 
@@ -174,6 +184,31 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
             IsSuccess = true,
             Message = $"{(kind ? "Up" : "Down")}vote submitted"
         };
+    }
+
+    public async Task<SamanSalamatResponse?> LoadVotesAsync(int id, CancellationToken cancellationToken = new())
+    {
+        var answer = await LoadModelByIdAsync(id, cancellationToken);
+
+        if (answer is null)
+        {
+            return new SamanSalamatResponse()
+            {
+                IsSuccess = false,
+                Message = $"No answer found with ID of {id}"
+            };
+        }
+
+        var votes = answer.Votes!.ToList();
+
+        var response = _mapper.Map<List<VoteDto>>(votes);
+
+        return new SamanSalamatResponse()
+        {
+            Data = response,
+            IsSuccess = true,
+        };
+
     }
 
 }

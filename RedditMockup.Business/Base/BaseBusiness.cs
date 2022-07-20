@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using RedditMockup.Business.Contracts;
 using RedditMockup.Common.Dtos;
 using RedditMockup.DataAccess.Contracts;
@@ -18,7 +19,7 @@ public abstract class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
 
     private readonly IMapper _mapper;
 
-    public BaseBusiness(IUnitOfWork unitOfWork, IBaseRepository<T> repository, IMapper mapper)
+    protected BaseBusiness(IUnitOfWork unitOfWork, IBaseRepository<T> repository, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _repository = repository;
@@ -87,12 +88,13 @@ public abstract class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
 
     /*-------------------------------------------------------------------*/
 
-    public abstract Task<SamanSalamatResponse?> CreateAsync(DTO dto, CancellationToken cancellationToken);
+    public abstract Task<SamanSalamatResponse?> CreateAsync(DTO dto, HttpContext httpContext, CancellationToken 
+    cancellationToken = new());
 
-    public abstract Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken);
+    public abstract Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken = new());
 
-    public abstract Task<SamanSalamatResponse?> UpdateAsync(int id, DTO dto, CancellationToken cancellationToken);
+    public abstract Task<SamanSalamatResponse?> UpdateAsync(int id, DTO dto, CancellationToken cancellationToken = new());
 
-    public abstract Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken);
+    public abstract Task<SamanSalamatResponse?> DeleteAsync(int id, CancellationToken cancellationToken = new());
 
 }

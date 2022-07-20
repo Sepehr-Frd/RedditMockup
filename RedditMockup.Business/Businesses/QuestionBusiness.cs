@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using RedditMockup.Business.Base;
 using RedditMockup.Business.Contracts;
@@ -30,11 +32,15 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
 
     }
 
-    public override async Task<SamanSalamatResponse?> CreateAsync(QuestionDto dto, CancellationToken cancellationToken = new())
+    public override async Task<SamanSalamatResponse?> CreateAsync(QuestionDto dto, HttpContext httpContext, CancellationToken cancellationToken = new())
     {
         var question = _mapper.Map<Question>(dto);
 
-        var user = await _userBusiness.LoadModelByIdAsync(dto.UserId, cancellationToken);
+        var stringUserId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        int userId = int.Parse(stringUserId);
+
+        var user = await _userBusiness.LoadModelByIdAsync(userId, cancellationToken);
 
         question.UserId = user!.Id;
 
@@ -74,11 +80,11 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = $"No question found with the ID of {id}"
+                Message = $"No question found with ID of {id}"
             };
         }
 
-        var response = _mapper.Map<AnswerDto>(question);
+        var response = _mapper.Map<QuestionDto>(question);
 
         return new SamanSalamatResponse()
         {
@@ -96,7 +102,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = "No question found with given question ID"
+                Message = $"No question found with ID of {id}"
             };
         }
 
@@ -120,7 +126,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = "No question found with given question ID"
+                Message = $"No question found with ID of {id}"
             };
         }
 
@@ -145,7 +151,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = $"No question found with id of {id}"
+                Message = $"No question found with ID of {id}"
             };
         }
 
@@ -181,7 +187,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = "No question found with given question ID"
+                Message = $"No question found with ID of {id}"
             };
         }
 
@@ -200,7 +206,7 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
             return new SamanSalamatResponse()
             {
                 IsSuccess = false,
-                Message = $"No question found with id of {id}"
+                Message = $"No question found with ID of {id}"
             };
         }
 

@@ -6,7 +6,6 @@ using RedditMockup.Business.Contracts;
 using RedditMockup.Common.Dtos;
 using RedditMockup.Model.Entities;
 using Sieve.Models;
-using System.Collections;
 
 
 /*
@@ -21,7 +20,7 @@ namespace RedditMockup.Api.Base;
 
 [ApiController]
 [Route("api/[controller]")]
-//[Authorization]
+[Authorization]
 public class BaseController<T, DTO> : ControllerBase, IBaseController<DTO>
     where T : BaseEntity
 {
@@ -35,14 +34,14 @@ public class BaseController<T, DTO> : ControllerBase, IBaseController<DTO>
     public async Task<SamanSalamatResponse<IEnumerable<DTO>>?> GetAllAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken) =>
         await _business.LoadAllAsync(sieveModel, cancellationToken);
 
-    [Route("{id:int}")]
+    [Route("id")]
     [HttpGet]
     public async Task<SamanSalamatResponse?> GetByIdAsync([FromQuery] int id, CancellationToken cancellationToken) =>
         await _business.LoadByIdAsync(id, cancellationToken);
 
     [HttpPost]
     public async Task<SamanSalamatResponse?> CreateAsync([FromQuery] DTO dto, CancellationToken cancellationToken) =>
-        await _business.CreateAsync(dto, cancellationToken);
+        await _business.CreateAsync(dto, HttpContext, cancellationToken);
 
     [HttpDelete]
     public async Task<SamanSalamatResponse?> DeleteAsync([FromQuery] int id, CancellationToken cancellationToken) =>

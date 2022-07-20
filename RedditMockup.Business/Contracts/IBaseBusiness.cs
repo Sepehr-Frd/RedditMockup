@@ -1,4 +1,5 @@
-﻿using RedditMockup.Common.Dtos;
+﻿using Microsoft.AspNetCore.Http;
+using RedditMockup.Common.Dtos;
 using Sieve.Models;
 using System.Collections;
 
@@ -14,7 +15,7 @@ public interface IBaseBusiness<T, DTO>
 
     Task<SamanSalamatResponse?> DeleteAsync(T t, CancellationToken cancellationToken);
 
-    Task<SamanSalamatResponse?> CreateAsync(DTO dto, CancellationToken cancellationToken);
+    Task<SamanSalamatResponse?> CreateAsync(DTO dto, HttpContext httpContext, CancellationToken cancellationToken);
 
     Task<SamanSalamatResponse?> LoadByIdAsync(int id, CancellationToken cancellationToken);
 

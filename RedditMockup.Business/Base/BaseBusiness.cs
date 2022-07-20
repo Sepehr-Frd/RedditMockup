@@ -70,13 +70,13 @@ public abstract class BaseBusiness<T, DTO> : IBaseBusiness<T, DTO>
         };
     }
 
-    public async Task<SamanSalamatResponse<IEnumerable>?> LoadAllAsync(SieveModel sieveModel, CancellationToken cancellationToken = new())
+    public async Task<SamanSalamatResponse<IEnumerable<DTO>>?> LoadAllAsync(SieveModel sieveModel, CancellationToken cancellationToken = new())
     {
         var data = await _repository.LoadAllAsync(sieveModel, null, cancellationToken);
 
-        var result = _mapper.Map<List<DTO>>(data);
+        var result = _mapper.Map<IEnumerable<DTO>>(data);
 
-        return new SamanSalamatResponse<IEnumerable>
+        return new SamanSalamatResponse<IEnumerable<DTO>>
         {
             Data = result,
             Message = "Data Loaded",

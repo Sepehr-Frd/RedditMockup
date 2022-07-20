@@ -21,7 +21,7 @@ namespace RedditMockup.Api.Base;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorization]
+//[Authorization]
 public class BaseController<T, DTO> : ControllerBase, IBaseController<DTO>
     where T : BaseEntity
 {
@@ -32,7 +32,7 @@ public class BaseController<T, DTO> : ControllerBase, IBaseController<DTO>
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<SamanSalamatResponse<IEnumerable>?> GetAllAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken) =>
+    public async Task<SamanSalamatResponse<IEnumerable<DTO>>?> GetAllAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken) =>
         await _business.LoadAllAsync(sieveModel, cancellationToken);
 
     [Route("{id:int}")]

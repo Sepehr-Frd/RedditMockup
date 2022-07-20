@@ -34,7 +34,6 @@ try
         .InjectAutoMapper()
         .InjectContentCompression();
 
-
     var app = builder.Build();
 
     await using var scope = app.Services.CreateAsyncScope();

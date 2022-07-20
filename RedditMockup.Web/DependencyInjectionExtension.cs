@@ -28,7 +28,7 @@ internal static class DependencyInjectionExtension
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
             })
-            .AddApplicationPart(typeof(IBaseController<BaseEntity>).Assembly)
+            .AddApplicationPart(typeof(IBaseController<>).Assembly)
             .Services
             .AddHealthChecks()
             .Services;
@@ -81,15 +81,15 @@ internal static class DependencyInjectionExtension
 
     internal static IServiceCollection InjectBusinesses(this IServiceCollection services) =>
         services.Scan(scan =>
-            scan.FromAssembliesOf(typeof(IBaseBusiness<BaseEntity, object>))
+            scan.FromAssembliesOf(typeof(IBaseBusiness<,>))
                 .AddClasses(classes =>
-                    classes.AssignableTo(typeof(IBaseBusiness<BaseEntity, object>)))
+                    classes.AssignableTo(typeof(IBaseBusiness<,>)))
                 .AsImplementedInterfaces()
                 .WithScopedLifetime()
                 .AddClasses(classes =>
                     classes.Where(predicate =>
                         predicate.Name.EndsWith("Business") &&
-                        !predicate.IsAssignableTo(typeof(IBaseBusiness<BaseEntity, object>))))
+                        !predicate.IsAssignableTo(typeof(IBaseBusiness<,>))))
                 .AsSelf()
                 .WithScopedLifetime());
 

@@ -16,12 +16,11 @@ public class AccountController : ControllerBase
     public AccountController(AccountBusiness accountBusiness) =>
         _accountBusiness = accountBusiness;
 
-    [Authorization]
+    //[Authorization]
     [HttpGet]
     public async Task<List<UserViewModel>> GetAllUsersAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken) =>
         await _accountBusiness.LoadAllUsersViewModelAsync(sieveModel, cancellationToken);
 
-    [Authorization]
     [HttpGet]
     [Route("Logout")]
     public async Task<SamanSalamatResponse> Logout() =>

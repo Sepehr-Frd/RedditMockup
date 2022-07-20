@@ -9,7 +9,7 @@ public interface IBaseController<DTO>
 {
     Task<SamanSalamatResponse?> CreateAsync(DTO dto, CancellationToken cancellationToken);
 
-    Task<SamanSalamatResponse<IEnumerable>?> GetAllAsync(SieveModel sieveModel, CancellationToken cancellationToken);
+    Task<SamanSalamatResponse<IEnumerable<DTO>>?> GetAllAsync(SieveModel sieveModel, CancellationToken cancellationToken);
 
     Task<SamanSalamatResponse?> GetByIdAsync(int id, CancellationToken cancellationToken);
 

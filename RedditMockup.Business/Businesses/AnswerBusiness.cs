@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RedditMockup.Business.Base;
+using RedditMockup.Business.Contracts;
 using RedditMockup.Common.Dtos;
 using RedditMockup.DataAccess.Contracts;
 using RedditMockup.DataAccess.Repositories;
@@ -21,13 +22,13 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
     private readonly IMapper _mapper;
 
 
-    public AnswerBusiness(IUnitOfWork unitOfWork, IMapper mapper, UserBusiness userBusiness, QuestionBusiness questionBusiness) : base(unitOfWork, unitOfWork.AnswerRepository!, mapper)
+    public AnswerBusiness(IUnitOfWork unitOfWork, IMapper mapper, IBaseBusiness<User, UserDto> userBusiness, IBaseBusiness<Question, QuestionDto> questionBusiness) : base(unitOfWork, unitOfWork.AnswerRepository!, mapper)
     {
         _answerRepository = unitOfWork.AnswerRepository!;
         _questionRepository = unitOfWork.QuestionRepository!;
-        _questionBusiness = questionBusiness;
+        _questionBusiness = (QuestionBusiness)questionBusiness;
         _answerVoteRepository = unitOfWork.AnswerVoteRepository!;
-        _userBusiness = userBusiness;
+        _userBusiness = (UserBusiness)userBusiness;
         _userRepository = unitOfWork.UserRepository!;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
@@ -48,7 +49,7 @@ public class AnswerBusiness : BaseBusiness<Answer, AnswerDto>
 
         var answer = _mapper.Map<Answer>(dto);
 
-        var user = await _userBusiness.LoadModelByIdAsync(dto.UserId);
+        var user = await _userBusiness.LoadModelByIdAsync(dto.UserId, cancellationToken);
 
         answer.QuestionId = question.Id;
 

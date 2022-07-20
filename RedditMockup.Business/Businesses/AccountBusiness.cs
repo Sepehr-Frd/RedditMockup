@@ -20,15 +20,12 @@ public class AccountBusiness
 
     private readonly UserRepository _userRepository;
 
-    private readonly UserBusiness _userBusiness;
-
     private readonly IMapper _mapper;
 
-    public AccountBusiness(IUnitOfWork unitOfWork, IMapper mapper, UserBusiness userBusiness)
+    public AccountBusiness(IUnitOfWork unitOfWork, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _userRepository = unitOfWork.UserRepository!;
-        _userBusiness = userBusiness;
         _mapper = mapper;
     }
 
@@ -36,12 +33,19 @@ public class AccountBusiness
     {
         SieveModel sieveModel = new()
         {
-            Filters = $"Username=={login.Username!}, Password=={login.Password!.GetHashStringAsync()}"
+            Filters = $"Username=={login.Username!}"
         };
 
         var users = await _userRepository.LoadAllAsync(sieveModel, null, cancellationToken);
 
-        return users.Count > 0;
+        if (users.Count == 0)
+        {
+            return false;
+        }
+
+        var isPasswordValid = (await login.Password!.GetHashStringAsync()) == users.Single().Password;
+
+        return isPasswordValid;
     }
 
     private static bool IsSignedIn(HttpContext httpContext) =>
@@ -54,7 +58,14 @@ public class AccountBusiness
             Filters = $"Username=={username}"
         };
 
-        var users = await _userRepository.LoadAllAsync(sieveModel, null, cancellationToken);
+        var users = await _userRepository.LoadAllAsync(sieveModel, include =>
+        include
+        .Include(x => x.Person)
+        .Include(x => x.Profile)
+        .Include(x => x.Questions)
+        .Include(x => x.Answers)
+        .Include(x => x.UserRoles),
+        cancellationToken);
 
         if (users.Count == 0)
         {
@@ -68,10 +79,6 @@ public class AccountBusiness
             _mapper.Map<List<UserViewModel>>(await _userRepository.LoadAllAsync(sieveModel,
             include => include
                 .Include(x => x.Person)
-                .Include(x => x.Answers)
-                .Include(x => x.Questions)
-                .Include(x => x.Profile)
-                .Include(x => x.Username)
                 .Include(x => x.UserRoles)!
                 .ThenInclude(x => x.Role),
             cancellationToken));

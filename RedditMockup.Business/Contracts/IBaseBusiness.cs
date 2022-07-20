@@ -8,7 +8,7 @@ public interface IBaseBusiness<T, DTO>
 {
     Task<SamanSalamatResponse?> CreateAsync(T t, CancellationToken cancellationToken);
 
-    Task<SamanSalamatResponse<IEnumerable>?> LoadAllAsync(SieveModel sieveModel, CancellationToken cancellationToken);
+    Task<SamanSalamatResponse<IEnumerable<DTO>>?> LoadAllAsync(SieveModel sieveModel, CancellationToken cancellationToken);
 
     Task<SamanSalamatResponse?> UpdateAsync(T t, CancellationToken cancellationToken);
 

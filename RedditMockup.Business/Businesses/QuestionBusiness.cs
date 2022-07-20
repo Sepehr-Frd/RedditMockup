@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RedditMockup.Business.Base;
+using RedditMockup.Business.Contracts;
 using RedditMockup.Common.Dtos;
 using RedditMockup.DataAccess.Contracts;
 using RedditMockup.DataAccess.Repositories;
@@ -18,12 +19,12 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public QuestionBusiness(IUnitOfWork unitOfWork, IMapper mapper, UserBusiness userBusiness) : base(unitOfWork, unitOfWork.QuestionRepository!, mapper)
+    public QuestionBusiness(IUnitOfWork unitOfWork, IMapper mapper, IBaseBusiness<User, UserDto> userBusiness) : base(unitOfWork, unitOfWork.QuestionRepository!, mapper)
     {
         _questionRepository = unitOfWork.QuestionRepository!;
         _questionVoteRepository = unitOfWork.QuestionVoteRepository!;
         _userRepository = unitOfWork.UserRepository!;
-        _userBusiness = userBusiness;
+        _userBusiness = (UserBusiness)userBusiness;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
 

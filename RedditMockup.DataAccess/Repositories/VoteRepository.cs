@@ -7,14 +7,19 @@ namespace RedditMockup.DataAccess.Repositories;
 
 public class AnswerVoteRepository : BaseRepository<AnswerVote>
 {
-    public AnswerVoteRepository(RedditMockupContext context, ISieveProcessor sieveProcessor) : base(context, sieveProcessor)
-    {
-    }
+    #region [Constructor]
+
+    public AnswerVoteRepository(RedditMockupContext context, ISieveProcessor sieveProcessor) : base(context, sieveProcessor) { }
+
+    #endregion
+
 }
 
 public class QuestionVoteRepository : BaseRepository<QuestionVote>
 {
-    public QuestionVoteRepository(RedditMockupContext context, ISieveProcessor sieveProcessor) : base(context, sieveProcessor)
-    {
-    }
+    #region [Constructor]
+
+    public QuestionVoteRepository(RedditMockupContext context, ISieveProcessor sieveProcessor) : base(context, sieveProcessor) { }
+
+    #endregion
 }

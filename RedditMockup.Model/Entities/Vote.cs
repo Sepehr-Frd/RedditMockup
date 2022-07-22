@@ -5,6 +5,8 @@ namespace RedditMockup.Model.Entities;
 
 public class AnswerVote : BaseEntity
 {
+    #region [Properties]
+
     [Sieve(CanSort = true)]
     public bool Kind { get; set; }
 
@@ -13,10 +15,15 @@ public class AnswerVote : BaseEntity
     [ForeignKey("AnswerId")]
     public virtual Answer? Answer { get; set; }
 
+    #endregion
+
+
 }
 
 public class QuestionVote : BaseEntity
 {
+    #region [Properties]
+
     [Sieve(CanSort = true)]
     public bool Kind { get; set; }
 
@@ -24,5 +31,7 @@ public class QuestionVote : BaseEntity
 
     [ForeignKey("QuestionId")]
     public virtual Question? Question { get; set; }
+
+    #endregion
 
 }

@@ -6,7 +6,13 @@ namespace RedditMockup.DataAccess.Context;
 
 public class RedditMockupContext : DbContext
 {
+    #region [Constructor]
+
     public RedditMockupContext(DbContextOptions options) : base(options) { }
+
+    #endregion
+
+    #region [Properties]
 
     public DbSet<Answer>? Answers { get; set; }
 
@@ -23,6 +29,10 @@ public class RedditMockupContext : DbContext
     public DbSet<UserRole>? UserRoles { get; set; }
 
     public DbSet<AnswerVote>? Votes { get; set; }
+
+    #endregion
+
+    #region [Methods]
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -109,4 +119,5 @@ public class RedditMockupContext : DbContext
         });
     }
 
+    #endregion
 }

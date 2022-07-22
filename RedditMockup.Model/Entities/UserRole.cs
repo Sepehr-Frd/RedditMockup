@@ -6,6 +6,8 @@ namespace RedditMockup.Model.Entities;
 
 public class UserRole : BaseEntity
 {
+    #region [Properties]
+
     [Sieve(CanFilter = true, CanSort = true)]
     public int UserId { get; set; }
 
@@ -19,4 +21,6 @@ public class UserRole : BaseEntity
     [CacheableContract]
     [ForeignKey("RoleId")]
     public Role? Role { get; set; }
+
+    #endregion
 }

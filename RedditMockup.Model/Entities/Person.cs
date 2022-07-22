@@ -4,6 +4,8 @@ namespace RedditMockup.Model.Entities;
 
 public class Person : BaseEntity
 {
+    #region [Properties]
+
     [Sieve(CanFilter = true, CanSort = true)]
     public string? Name { get; set; }
 
@@ -13,4 +15,7 @@ public class Person : BaseEntity
     public string FullName => Name + " " + Family;
 
     public virtual User? User { get; set; }
+
+    #endregion
+
 }

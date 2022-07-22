@@ -1,10 +1,12 @@
-﻿using Sieve.Attributes;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Sieve.Attributes;
 
 namespace RedditMockup.Model.Entities;
 
 public class Profile : BaseEntity
 {
+    #region [Properties]
+
     public string? Bio { get; set; } = string.Empty;
 
     [Sieve(CanFilter = true, CanSort = true)]
@@ -14,4 +16,6 @@ public class Profile : BaseEntity
 
     [ForeignKey("UserId")]
     public virtual User? User { get; set; }
+
+    #endregion
 }

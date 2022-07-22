@@ -1,10 +1,12 @@
-﻿using Sieve.Attributes;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Sieve.Attributes;
 
 namespace RedditMockup.Model.Entities;
 
 public class Question : BaseEntity
 {
+    #region [Properties]
+
     [Sieve(CanFilter = true, CanSort = true)]
     public string? Title { get; set; }
 
@@ -20,5 +22,8 @@ public class Question : BaseEntity
 
     [ForeignKey("UserId")]
     public virtual User? User { get; set; }
+
+    #endregion
+
 
 }

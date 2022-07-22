@@ -8,10 +8,20 @@ namespace RedditMockup.DataAccess.Repositories;
 
 public class RoleRepository : BaseRepository<Role>
 {
+    #region [Fields]
+
     private readonly RedditMockupContext _context;
+
+    #endregion
+
+    #region [Constructor]
 
     public RoleRepository(RedditMockupContext context, ISieveProcessor sieveProcessor) : base(context, sieveProcessor) =>
         _context = context;
+
+    #endregion
+
+    #region [Methods]
 
     public async Task<List<Role?>> LoadByUserIdAsync(int userId, CancellationToken cancellationToken = new()) =>
         await _context.UserRoles!
@@ -19,4 +29,6 @@ public class RoleRepository : BaseRepository<Role>
             .Include(x => x.Role)
             .Select(x => x.Role)
             .ToListAsync(cancellationToken);
+
+    #endregion
 }

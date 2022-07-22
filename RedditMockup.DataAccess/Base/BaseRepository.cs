@@ -8,14 +8,19 @@ using Sieve.Services;
 
 namespace RedditMockup.DataAccess.Base;
 
-
 public class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity
 {
+    #region [Fields]
+
     private readonly DbSet<T> _dbSet;
 
     private readonly ISieveProcessor _processor;
 
     private readonly RedditMockupContext _context;
+
+    #endregion
+
+    #region [Constructor]
 
     public BaseRepository(RedditMockupContext context, ISieveProcessor processor)
     {
@@ -23,6 +28,11 @@ public class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity
         _dbSet = context.Set<T>();
         _context = context;
     }
+
+    #endregion
+
+
+    #region [Methods]
 
     public async Task<T> CreateAsync(T t, CancellationToken cancellationToken = new()) =>
         (await _dbSet.AddAsync(t, cancellationToken)).Entity;
@@ -59,4 +69,5 @@ public class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity
     public async Task<T> DeleteAsync(T t, CancellationToken cancellationToken = new()) =>
         (await Task.FromResult(_dbSet.Remove(t))).Entity;
 
+    #endregion
 }

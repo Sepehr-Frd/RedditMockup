@@ -4,6 +4,8 @@ namespace RedditMockup.DataAccess.Contracts;
 
 public interface IUnitOfWork
 {
+    #region [Properties]
+
     AnswerRepository? AnswerRepository { get; }
 
     PersonRepository? PersonRepository { get; }
@@ -22,7 +24,13 @@ public interface IUnitOfWork
 
     AnswerVoteRepository? AnswerVoteRepository { get; }
 
+    #endregion
+
+    #region [Methods]
+
     int Commit();
 
     Task<int> CommitAsync(CancellationToken cancellationToken);
+
+    #endregion
 }

@@ -16,7 +16,6 @@
   <ItemGroup>
     <Folder Include="Base\" />
     <Folder Include="Contracts\" />
-    <Folder Include="Controllers\" />
     <Folder Include="Filters\" />
   </ItemGroup>
   <ItemGroup>

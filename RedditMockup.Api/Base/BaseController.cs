@@ -7,15 +7,6 @@ using RedditMockup.Common.Dtos;
 using RedditMockup.Model.Entities;
 using Sieve.Models;
 
-
-/*
- * GetAllAsync(sievemodel) //Admin
- * GetByIdAsync(int id) Admin
- * AddAsync(T) Admin
- * Update(T) Admin
- * Delete(int) Admin
- *
- */
 namespace RedditMockup.Api.Base;
 
 [ApiController]

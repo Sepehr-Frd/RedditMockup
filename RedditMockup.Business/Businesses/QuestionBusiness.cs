@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using RedditMockup.Business.Base;
@@ -9,6 +8,7 @@ using RedditMockup.DataAccess.Contracts;
 using RedditMockup.DataAccess.Repositories;
 using RedditMockup.Model.Entities;
 using Sieve.Models;
+using System.Security.Claims;
 
 namespace RedditMockup.Business.Businesses;
 
@@ -16,7 +16,6 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
 {
     private readonly QuestionRepository _questionRepository;
     private readonly QuestionVoteRepository _questionVoteRepository;
-    private readonly UserRepository _userRepository;
     private readonly UserBusiness _userBusiness;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
@@ -25,7 +24,6 @@ public class QuestionBusiness : BaseBusiness<Question, QuestionDto>
     {
         _questionRepository = unitOfWork.QuestionRepository!;
         _questionVoteRepository = unitOfWork.QuestionVoteRepository!;
-        _userRepository = unitOfWork.UserRepository!;
         _userBusiness = (UserBusiness)userBusiness;
         _unitOfWork = unitOfWork;
         _mapper = mapper;

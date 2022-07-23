@@ -11,7 +11,12 @@
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="RedditMockup.IntegrationTest" />
+	</ItemGroup>
+
+	<ItemGroup>
     <None Remove="Microsoft.EntityFrameworkCore.Tools" />
     <None Remove="Microsoft.OpenApi" />
     <None Remove="Microsoft.EntityFrameworkCore.InMemory" />

@@ -50,7 +50,7 @@ public class RedditMockupContext : DbContext
             {
                 Id = 2,
                 Title = "User",
-                Description = "User of Application",
+                Description = "User of Application"
             }
         });
 

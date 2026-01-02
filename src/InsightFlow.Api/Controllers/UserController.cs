@@ -10,6 +10,7 @@ using InsightFlow.Application.Features.Users.Queries.GetSingleUserProfileImage;
 using InsightFlow.Application.Interfaces;
 using InsightFlow.Common.Cqrs;
 using InsightFlow.Domain.Common;
+using InsightFlow.Infrastructure.Common;
 using InsightFlow.Infrastructure.Common.Constants;
 using InsightFlow.Infrastructure.Common.Dtos;
 using InsightFlow.Infrastructure.Common.Helpers;
@@ -171,7 +172,9 @@ public class UserController : ControllerBase
     {
         var signedInUserUuid = _authService.GetSignedInUserUuid();
 
-        var command = new UpdateProfileImageCommand(Guid.Parse(signedInUserUuid), imageFile);
+        var file = new FormFileAdapter(imageFile);
+
+        var command = new UpdateProfileImageCommand(Guid.Parse(signedInUserUuid), file);
 
         var response = await _mediator.SendAsync(command, cancellationToken);
 

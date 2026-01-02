@@ -49,7 +49,7 @@ public class UpdateProfileImageCommandHandler : ICommandHandler<UpdateProfileIma
 
         await using var memoryStream = new MemoryStream();
 
-        await request.ImageFile.CopyToAsync(memoryStream, cancellationToken);
+        await request.ImageFile.OpenReadStream().CopyToAsync(memoryStream, cancellationToken);
 
         var profileImageBytes = memoryStream.ToArray();
 

@@ -11,4 +11,6 @@ public class BlogPost : DomainEntity
     public User? Author { get; set; }
 
     public long AuthorId { get; set; }
+
+    // public BlogPostCoverImage? CoverImage { get; set; }
 }

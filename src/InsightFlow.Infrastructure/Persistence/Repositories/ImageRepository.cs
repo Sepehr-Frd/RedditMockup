@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InsightFlow.Infrastructure.Persistence.Repositories;
 
-public class ProfileImageRepository : RepositoryBase<ProfileImage, long>, IProfileImageRepository
+public class ImageRepository : RepositoryBase<Image, long>, IImageRepository
 {
-    public ProfileImageRepository(DbSet<ProfileImage> dbSet, IDbConnectionPool dbConnectionPool)
+    public ImageRepository(DbSet<Image> dbSet, IDbConnectionPool dbConnectionPool)
         : base(dbSet, dbConnectionPool)
     {
     }

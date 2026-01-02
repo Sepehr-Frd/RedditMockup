@@ -106,8 +106,6 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Domai
             }
         }
 
-        userEntity.ProfileImage = new ProfileImage();
-
         await _unitOfWork.UserRepository.CreateAsync(userEntity, cancellationToken);
 
         var commitResult = await _unitOfWork.CommitChangesAsync(cancellationToken);

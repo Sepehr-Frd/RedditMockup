@@ -12,7 +12,7 @@ public interface IUnitOfWork
 
     IUserRoleRepository UserRoleRepository { get; }
 
-    IProfileImageRepository ProfileImageRepository { get; }
+    IImageRepository ImageRepository { get; }
 
     int CommitChanges();
 

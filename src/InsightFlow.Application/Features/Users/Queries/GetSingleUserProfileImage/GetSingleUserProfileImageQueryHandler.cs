@@ -5,11 +5,12 @@ using InsightFlow.Common.Constants;
 using InsightFlow.Common.Cqrs.Queries;
 using InsightFlow.Domain.Common;
 using InsightFlow.Domain.Entities;
+using InsightFlow.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 
 namespace InsightFlow.Application.Features.Users.Queries.GetSingleUserProfileImage;
 
-public class GetSingleUserProfileImageQueryHandler : IQueryHandler<GetSingleUserProfileImageQuery, DomainResponse<ProfileImageResponseDto>>
+public class GetSingleUserProfileImageQueryHandler : IQueryHandler<GetSingleUserProfileImageQuery, DomainResponse<ImageResponseDto>>
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -18,11 +19,10 @@ public class GetSingleUserProfileImageQueryHandler : IQueryHandler<GetSingleUser
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<DomainResponse<ProfileImageResponseDto>> HandleAsync(GetSingleUserProfileImageQuery request, CancellationToken cancellationToken)
+    public async Task<DomainResponse<ImageResponseDto>> HandleAsync(GetSingleUserProfileImageQuery request, CancellationToken cancellationToken)
     {
         var user = await _unitOfWork.UserRepository.GetOneAsync(
             user => user.Uuid == request.UserUuid,
-            [user => user.ProfileImage],
             disableTracking: true,
             cancellationToken: cancellationToken);
 
@@ -33,19 +33,25 @@ public class GetSingleUserProfileImageQueryHandler : IQueryHandler<GetSingleUser
                 nameof(User).Humanize(LetterCasing.LowerCase),
                 request.UserUuid);
 
-            return DomainResponse<ProfileImageResponseDto>.CreateFailure(message, StatusCodes.Status404NotFound);
+            return DomainResponse<ImageResponseDto>.CreateFailure(message, StatusCodes.Status404NotFound);
         }
 
-        if (user.ProfileImage!.ImageBytes is null)
+        var profileImage = await _unitOfWork
+            .ImageRepository
+            .GetOneAsync(
+                image => image.Type == ImageType.ProfileImage && image.OwnerId == user.Id,
+                cancellationToken: cancellationToken);
+
+        if (profileImage?.ImageBytes is null)
         {
-            return DomainResponse<ProfileImageResponseDto>.CreateFailure(StringConstants.NoProfileImageUploadedYetMessage, StatusCodes.Status404NotFound);
+            return DomainResponse<ImageResponseDto>.CreateFailure(StringConstants.NoProfileImageUploadedYetMessage, StatusCodes.Status404NotFound);
         }
 
-        var responseDto = new ProfileImageResponseDto(
-            user.ProfileImage.ImageBytes,
-            user.ProfileImage.ImageFormat!,
-            user.ProfileImage.UpdatedAt);
+        var responseDto = new ImageResponseDto(
+            profileImage.ImageBytes,
+            profileImage.ImageFormat!,
+            profileImage.UpdatedAt);
 
-        return DomainResponse<ProfileImageResponseDto>.CreateSuccess(null, StatusCodes.Status200OK, responseDto);
+        return DomainResponse<ImageResponseDto>.CreateSuccess(null, StatusCodes.Status200OK, responseDto);
     }
 }

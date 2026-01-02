@@ -4,4 +4,4 @@ using InsightFlow.Domain.Common;
 
 namespace InsightFlow.Application.Features.Users.Queries.GetSingleUserProfileImage;
 
-public record GetSingleUserProfileImageQuery(Guid UserUuid) : IQuery<DomainResponse<ProfileImageResponseDto>>;
+public record GetSingleUserProfileImageQuery(Guid UserUuid) : IQuery<DomainResponse<ImageResponseDto>>;

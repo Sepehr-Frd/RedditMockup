@@ -8,21 +8,21 @@ using InsightFlow.Domain.Entities;
 using InsightFlow.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 
-namespace InsightFlow.Application.Features.Users.Commands.UpdateProfileImage;
+namespace InsightFlow.Application.Features.BlogPosts.Commands.UpdateCoverImage;
 
-public class UpdateProfileImageCommandHandler : ICommandHandler<UpdateProfileImageCommand, DomainResponse>
+public class UpdateCoverImageCommandHandler : ICommandHandler<UpdateCoverImageCommand, DomainResponse>
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateProfileImageCommandHandler(IUnitOfWork unitOfWork)
+    public UpdateCoverImageCommandHandler(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<DomainResponse> HandleAsync(UpdateProfileImageCommand request, CancellationToken cancellationToken)
+    public async Task<DomainResponse> HandleAsync(UpdateCoverImageCommand request, CancellationToken cancellationToken = default)
     {
         var user = await _unitOfWork.UserRepository.GetOneAsync(
-            user => user.Uuid == request.Uuid,
+            user => user.Uuid == request.UserUuid,
             cancellationToken: cancellationToken);
 
         if (user is null)
@@ -30,15 +30,39 @@ public class UpdateProfileImageCommandHandler : ICommandHandler<UpdateProfileIma
             var message = string.Format(
                 StringConstants.EntityNotFoundByUuidTemplate,
                 nameof(User).Humanize(LetterCasing.LowerCase),
-                request.Uuid);
+                request.UserUuid);
 
             return DomainResponse.CreateBaseFailure(message, StatusCodes.Status404NotFound);
+        }
+
+        var blogPost = await _unitOfWork.BlogPostRepository.GetOneAsync(
+            post => post.Uuid == request.BlogPostUuid,
+            cancellationToken: cancellationToken);
+
+        if (blogPost is null)
+        {
+            var message = string.Format(
+                StringConstants.EntityNotFoundByUuidTemplate,
+                nameof(BlogPost).Humanize(LetterCasing.LowerCase),
+                request.BlogPostUuid);
+
+            return DomainResponse.CreateBaseFailure(message, StatusCodes.Status404NotFound);
+        }
+
+        if (blogPost.AuthorId != user.Id)
+        {
+            var forbiddenMessage = string.Format(
+                StringConstants.ForbiddenActionTemplate,
+                StringConstants.UpdateActionName.Humanize(LetterCasing.LowerCase),
+                nameof(BlogPost).Humanize(LetterCasing.LowerCase));
+
+            return DomainResponse.CreateBaseFailure(forbiddenMessage, StatusCodes.Status403Forbidden);
         }
 
         var currentImage = await _unitOfWork
             .ImageRepository
             .GetOneAsync(
-                image => image.Type == ImageType.ProfileImage && image.OwnerId == user.Id,
+                image => image.Type == ImageType.BlogPostCoverImage && image.OwnerId == blogPost.Id,
                 cancellationToken: cancellationToken);
 
         if (currentImage is not null)
@@ -62,24 +86,24 @@ public class UpdateProfileImageCommandHandler : ICommandHandler<UpdateProfileIma
 
         await request.ImageFile.OpenReadStream().CopyToAsync(memoryStream, cancellationToken);
 
-        var profileImageBytes = memoryStream.ToArray();
+        var imageBytes = memoryStream.ToArray();
 
         var imageFormat = imageFileExtension == ApplicationConstants.Jpg ? ApplicationConstants.Jpeg : imageFileExtension;
 
-        var profileImage = new Image
+        var image = new Image
         {
-            ImageBytes = profileImageBytes,
+            ImageBytes = imageBytes,
             ImageFormat = imageFormat,
-            OwnerId = user.Id,
-            Type = ImageType.ProfileImage
+            OwnerId = blogPost.Id,
+            Type = ImageType.BlogPostCoverImage
         };
 
-        await _unitOfWork.ImageRepository.CreateAsync(profileImage, cancellationToken);
+        await _unitOfWork.ImageRepository.CreateAsync(image, cancellationToken);
 
-        user.PrepareForUpdate();
+        blogPost.PrepareForUpdate();
 
         await _unitOfWork.CommitChangesAsync(cancellationToken);
 
-        return DomainResponse.CreateBaseSuccess(StringConstants.SuccessfulProfileImageUploadMessage, StatusCodes.Status200OK);
+        return DomainResponse.CreateBaseSuccess(StringConstants.SuccessfulBlogPostCoverImageUploadMessage, StatusCodes.Status200OK);
     }
 }

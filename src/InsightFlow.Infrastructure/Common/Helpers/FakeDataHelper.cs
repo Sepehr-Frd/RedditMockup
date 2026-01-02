@@ -31,8 +31,7 @@ public static class FakeDataHelper
             .RuleFor(user => user.PasswordHash, _ => password)
             .RuleFor(user => user.Email, faker => faker.Internet.Email().ToLowerInvariant())
             .RuleFor(user => user.FirstName, faker => faker.Name.FirstName())
-            .RuleFor(user => user.LastName, faker => faker.Name.LastName())
-            .RuleFor(user => user.ProfileImage, _ => new ProfileImage());
+            .RuleFor(user => user.LastName, faker => faker.Name.LastName());
 
         var fakeUsers = new List<User>();
 
@@ -43,8 +42,7 @@ public static class FakeDataHelper
             PasswordHash = PasswordHelper.HashPassword("Sfr1376."),
             Email = "sepfrd@outlook.com",
             FirstName = "Sepehr",
-            LastName = "Foroughi Rad",
-            ProfileImage = new ProfileImage()
+            LastName = "Foroughi Rad"
         };
 
         FakeUser = new User
@@ -54,8 +52,7 @@ public static class FakeDataHelper
             PasswordHash = PasswordHelper.HashPassword("BernardCool1997."),
             Email = "bercool@gmail.com",
             FirstName = "Bernard",
-            LastName = "Cool",
-            ProfileImage = new ProfileImage()
+            LastName = "Cool"
         };
 
         fakeUsers.AddRange(new List<User>

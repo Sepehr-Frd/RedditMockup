@@ -14,7 +14,7 @@ public class UnitOfWork : DbContext, IUnitOfWork
     private UserRepository? _userRepository;
     private RoleRepository? _roleRepository;
     private UserRoleRepository? _userRoleRepository;
-    private ProfileImageRepository? _profileImageRepository;
+    private ImageRepository? _profileImageRepository;
 
     public UnitOfWork(DbContextOptions dbContextOptions, IDbConnectionPool dbConnectionPool) : base(dbContextOptions)
     {
@@ -29,7 +29,7 @@ public class UnitOfWork : DbContext, IUnitOfWork
 
     public DbSet<UserRole> UserRoles { get; set; }
 
-    public DbSet<ProfileImage> ProfileImages { get; set; }
+    public DbSet<Image> Images { get; set; }
 
     public IBlogPostRepository BlogPostRepository => _blogPostRepository ??= new BlogPostRepository(BlogPosts, _dbConnectionPool);
 
@@ -39,7 +39,7 @@ public class UnitOfWork : DbContext, IUnitOfWork
 
     public IUserRoleRepository UserRoleRepository => _userRoleRepository ??= new UserRoleRepository(UserRoles, _dbConnectionPool);
 
-    public IProfileImageRepository ProfileImageRepository => _profileImageRepository ??= new ProfileImageRepository(ProfileImages, _dbConnectionPool);
+    public IImageRepository ImageRepository => _profileImageRepository ??= new ImageRepository(Images, _dbConnectionPool);
 
     public int CommitChanges() => SaveChanges();
 

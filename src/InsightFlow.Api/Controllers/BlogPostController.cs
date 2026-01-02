@@ -1,11 +1,15 @@
+using System.Net.Mime;
 using Humanizer;
 using InsightFlow.Api.Common.Dtos.Requests;
+using InsightFlow.Application.Common;
 using InsightFlow.Application.Features.BlogPosts.Commands.CreateBlogPost;
 using InsightFlow.Application.Features.BlogPosts.Commands.DeleteBlogPost;
 using InsightFlow.Application.Features.BlogPosts.Commands.UpdateBlogPost;
+using InsightFlow.Application.Features.BlogPosts.Commands.UpdateCoverImage;
 using InsightFlow.Application.Features.BlogPosts.Dtos;
 using InsightFlow.Application.Features.BlogPosts.Queries.GetAllBlogPostsByFilter;
 using InsightFlow.Application.Features.BlogPosts.Queries.GetAllBlogPostsCount;
+using InsightFlow.Application.Features.BlogPosts.Queries.GetCoverImage;
 using InsightFlow.Application.Features.BlogPosts.Queries.GetSingleBlogPost;
 using InsightFlow.Application.Features.BlogPosts.Queries.GetUserBlogPosts;
 using InsightFlow.Application.Features.Users.Queries.GetUserIdByUserUuid;
@@ -13,6 +17,7 @@ using InsightFlow.Application.Interfaces;
 using InsightFlow.Common.Constants;
 using InsightFlow.Common.Cqrs;
 using InsightFlow.Domain.Common;
+using InsightFlow.Infrastructure.Common;
 using InsightFlow.Infrastructure.Common.Constants;
 using InsightFlow.Infrastructure.Common.Dtos;
 using InsightFlow.Infrastructure.Interfaces;
@@ -151,6 +156,58 @@ public class BlogPostController : ControllerBase
         var request = new GetSingleBlogPostQuery(uuid);
 
         var response = await _mediator.SendAsync(request, cancellationToken);
+
+        return StatusCode(response.StatusCode, response);
+    }
+
+    [HttpGet]
+    [Route("{blogPostUuid:guid}/cover-image")]
+    public async Task<IActionResult> GetCurrentUserProfileImageAsync([FromRoute] Guid blogPostUuid, CancellationToken cancellationToken)
+    {
+        var request = new GetCoverImageQuery(blogPostUuid);
+
+        var response = await _mediator.SendAsync(request, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            return StatusCode(response.StatusCode, response);
+        }
+
+        var image = response.Data!;
+
+        var imageName = blogPostUuid.ToString() + '-' + "cover-image";
+
+        var contentType = image.ImageFormat switch
+        {
+            ApplicationConstants.Jpeg or ApplicationConstants.Jpg => MediaTypeNames.Image.Jpeg,
+            ApplicationConstants.Png => MediaTypeNames.Image.Png,
+            _ => MediaTypeNames.Application.Octet
+        };
+
+        var imageResult = new FileContentResult(image.ImageBytes, contentType)
+        {
+            FileDownloadName = imageName,
+            LastModified = image.UpdatedAt
+        };
+
+        return imageResult;
+    }
+
+    [HttpPut]
+    [Authorize]
+    [Route("{blogPostUuid:guid}/cover-image")]
+    public async Task<ActionResult<BlogPostResponseDto>> UpdateUserProfileImageAsync(
+        IFormFile imageFile,
+        [FromRoute] Guid blogPostUuid,
+        CancellationToken cancellationToken)
+    {
+        var signedInUserUuid = _authService.GetSignedInUserUuid();
+
+        var file = new FormFileAdapter(imageFile);
+
+        var command = new UpdateCoverImageCommand(Guid.Parse(signedInUserUuid), blogPostUuid, file);
+
+        var response = await _mediator.SendAsync(command, cancellationToken);
 
         return StatusCode(response.StatusCode, response);
     }

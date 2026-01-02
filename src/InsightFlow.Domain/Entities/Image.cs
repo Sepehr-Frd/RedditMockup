@@ -1,14 +1,15 @@
 using InsightFlow.Domain.Common;
+using InsightFlow.Domain.Enums;
 
 namespace InsightFlow.Domain.Entities;
 
-public class ProfileImage : DomainEntity
+public class Image : DomainEntity
 {
     public byte[]? ImageBytes { get; set; }
 
     public string? ImageFormat { get; set; }
 
-    public long UserId { get; init; }
+    public long OwnerId { get; init; }
 
-    public User? User { get; init; }
+    public required ImageType Type { get; set; }
 }

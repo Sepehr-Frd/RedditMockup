@@ -20,6 +20,8 @@ public static class StringConstants
     public const string SuccessfulDeletionTemplate = "Successfully deleted {0} entity.";
     public const string SuccessfulProfileImageUploadMessage = "Successfully uploaded profile image.";
     public const string NoProfileImageUploadedYetMessage = "You have not uploaded a profile image yet.";
+    public const string SuccessfulBlogPostCoverImageUploadMessage = "Successfully uploaded cover image.";
+    public const string NoBlogPostCoverImageUploadedYetMessage = "No cover image uploaded for this blog post yet.";
     public const string ExceptionTemplate = "Application encountered an unhandled exception of type: {ExceptionType}";
     public const string ApplicationInternalServerErrorTemplate = "Application encountered an unexpected behavior: {Error}";
     public const string ApplicationFatalExceptionTemplate = "Application stopped due to a {exceptionType} exception";

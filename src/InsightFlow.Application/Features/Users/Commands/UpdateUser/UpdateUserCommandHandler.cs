@@ -43,16 +43,16 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Domai
             return DomainResponse<UserResponseDto>.CreateFailure(message, StatusCodes.Status404NotFound);
         }
 
-        if (request.NewFirstName == user.FirstName &&
-            request.NewLastName == user.LastName &&
-            request.NewEmail.Equals(user.Email, StringComparison.InvariantCultureIgnoreCase))
+        if ((string.IsNullOrWhiteSpace(request.NewFirstName) || request.NewFirstName == user.FirstName) &&
+            (string.IsNullOrWhiteSpace(request.NewLastName) || request.NewLastName == user.LastName) &&
+            (string.IsNullOrWhiteSpace(request.NewEmail) || request.NewEmail.Equals(user.Email, StringComparison.InvariantCultureIgnoreCase)))
         {
             return DomainResponse<UserResponseDto>.CreateFailure(
                 StringConstants.IdenticalNewPropertyValuesTemplate,
                 StatusCodes.Status400BadRequest);
         }
 
-        if (request.NewEmail != user.Email)
+        if (!string.IsNullOrWhiteSpace(request.NewEmail) && request.NewEmail != user.Email)
         {
             var isEmailUnique = await _unitOfWork.UserRepository.IsEmailUniqueAsync(request.NewEmail, cancellationToken);
 
@@ -65,23 +65,21 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Domai
 
                 return DomainResponse<UserResponseDto>.CreateFailure(message, StatusCodes.Status400BadRequest);
             }
+
+            user.Email = request.NewEmail;
         }
 
-        var updatedUser = _mappingService.Map(request, user);
-
-        if (updatedUser is null)
+        if (!string.IsNullOrWhiteSpace(request.NewFirstName) && request.NewFirstName != user.FirstName)
         {
-            _logger.LogCritical(
-                StringConstants.MappingErrorLogTemplate,
-                typeof(UpdateUserCommand),
-                typeof(User));
-
-            return DomainResponse<UserResponseDto>.CreateFailure(
-                StringConstants.InternalServerError,
-                StatusCodes.Status500InternalServerError);
+            user.FirstName = request.NewFirstName;
         }
 
-        updatedUser.PrepareForUpdate();
+        if (!string.IsNullOrWhiteSpace(request.NewLastName) && request.NewLastName != user.LastName)
+        {
+            user.LastName = request.NewLastName;
+        }
+
+        user.PrepareForUpdate();
 
         var commitResult = await _unitOfWork.CommitChangesAsync(cancellationToken);
 
@@ -94,7 +92,7 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Domai
                 StatusCodes.Status500InternalServerError);
         }
 
-        var userResponseDto = _mappingService.Map<User, UserResponseDto>(updatedUser);
+        var userResponseDto = _mappingService.Map<User, UserResponseDto>(user);
 
         if (userResponseDto is null)
         {

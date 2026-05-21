@@ -47,7 +47,9 @@ public static class Extensions
                         ? options.SqliteConnectionString!
                         : options.SqlServerConnectionString!;
 
-                    DbConnectionPool.Initialize(connectionString);
+                    DbConnectionPool.Initialize(
+                        connectionString,
+                        options.DatabaseProvider ?? StringConstants.Sqlite);
 
                     return DbConnectionPool.Instance;
                 })
